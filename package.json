@@ -1,7 +1,7 @@
 {
   "name": "coffee-pos-react",
   "version": "0.1.0",
-  "homepage": "https://github.com/0Alert0/galaxy_cafe",
+  "homepage": "https://0Alert0.github.com/galaxy_cafe",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
