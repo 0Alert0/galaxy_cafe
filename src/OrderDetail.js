@@ -76,7 +76,21 @@ export default function OrderDetail() {
             timestamp: new Date().toISOString()
         });
         localStorage.setItem('salesLog', JSON.stringify(salesLog));
-
+        
+        const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        const now = new Date().toISOString();
+        dailyReport.push({
+            timestamp: now,                    // ISO string timestamp
+            items: items.map(i => ({          // copy id/name/qty
+                id: i.id,
+                name: i.name,
+                qty: i.qty
+            })),
+            total: finalTotal,                // final total paid
+            method,                           // 'Cash' or 'LinePay'
+            cardNumber                       // if any, else ''
+        });
+        localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
         if (source === 'unpaid') {
             // Remove from unpaidOrders
             const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
@@ -131,7 +145,7 @@ export default function OrderDetail() {
                             onClick={() => setMethod(m)}
                         >
                             {m === 'Cash' ? '現金' : 'Line Pay'}
-                            
+
                         </button>
                     ))}
                 </div>

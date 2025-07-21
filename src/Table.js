@@ -79,6 +79,41 @@ export default function Table() {
         </button>
     );
 
+    // show summary: total qty, total cash & line‑pay
+    const showDailySummary = useCallback(() => {
+        const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        if (report.length === 0) {
+            return alert('今日日報尚無紀錄。');
+        }
+
+        // 1) Aggregate per-item qty
+        const itemTotals = {};
+        report.forEach(r => {
+            r.items.forEach(i => {
+                itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
+            });
+        });
+
+        // 2) Sum cash vs LinePay totals
+        let cashSum = 0, lineSum = 0;
+        report.forEach(r => {
+            if (r.method === 'Cash') cashSum += r.total;
+            else if (r.method === 'LinePay') lineSum += r.total;
+        });
+
+        // 3) Build message
+        const itemsMsg = Object.entries(itemTotals)
+            .map(([name, qty]) => `${name} *${qty}`)
+            .join('\n');
+
+        const msg =
+            `今日日報\n\n` +
+            `項目總數量:\n${itemsMsg}\n\n` +
+            `現金總額: $${cashSum.toFixed(2)}\n` +
+            `LinePay 總額: $${lineSum.toFixed(2)}`;
+
+        alert(msg);
+    }, []);
     return (
         <div className="table">
             <main className="main">
@@ -183,6 +218,14 @@ export default function Table() {
                     style={{ marginTop: '1rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
                 >
                     Clear All Storage
+                </button>
+
+                <button
+                    className="show-summary-button"
+                    onClick={showDailySummary}
+                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                >
+                    今日日報
                 </button>
             </aside>
         </div>
