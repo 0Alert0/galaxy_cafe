@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/galaxy_cafe/static/css/main.a5e8d211.css",
+    "main.js": "/galaxy_cafe/static/js/main.3bc51611.js",
+    "static/js/453.860ab39b.chunk.js": "/galaxy_cafe/static/js/453.860ab39b.chunk.js",
+    "index.html": "/galaxy_cafe/index.html",
+    "main.a5e8d211.css.map": "/galaxy_cafe/static/css/main.a5e8d211.css.map",
+    "main.3bc51611.js.map": "/galaxy_cafe/static/js/main.3bc51611.js.map",
+    "453.860ab39b.chunk.js.map": "/galaxy_cafe/static/js/453.860ab39b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.a5e8d211.css",
+    "static/js/main.3bc51611.js"
+  ]
+}
