@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Table from './Table';
-import TablePage from './TablePage';
-import UnpaidTablePage from './UnpaidTablePage';
-import OrderDetail from './OrderDetail';
-import Takeout from './Takeout';
+import Table from './src/Table';
+import TablePage from './src/TablePage';
+import UnpaidTablePage from './src/UnpaidTablePage';
+import OrderDetail from './src/OrderDetail';
+import Takeout from './src/Takeout';
 
 
 export default function App() {
