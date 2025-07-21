@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Takeout.css';
+import './takeout.css';
 
 export default function TakeoutPage() {
     const navigate = useNavigate();
