@@ -1,0 +1,31 @@
+/* Overall flex layout */
+.layout {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  height: 100vh;
+  /* Optional: give some breathing room */
+  padding: 1rem;
+}
+
+/* This area grows and centers its content */
+.table-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center; /* center horizontally */
+  align-items: flex-start; /* align to top */
+}
+
+/* Right column hugs its content and sits at the far right */
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  /* no flex-grow so it stays its own width */
+}
+
+/* Keep Menu and Cart side by side */
+.container {
+  display: flex;
+  gap: 2rem;
+}
