@@ -142,15 +142,15 @@ export default function Table() {
 
         // 1) UTF‑8 BOM
         const BOM = "\uFEFF";
-        let csvfile = BOM;
+        let csv = BOM;
 
         // 2a) prepend a human‑readable “今日日報” summary block
-        csvfile += '項目,總數量\n';
+        csv += '項目,總數量\n';
         Object.entries(itemTotals).forEach(([name, qty]) => {
-            csvfile += `"${name.replace(/"/g, '""')}",${qty}\n`;
+            csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
         });
-        csvfile += `\n現金總額,${cashSum}\n`;
-        csvfile += `LinePay總額,${lineSum}\n\n`;
+        csv += `\n現金總額,${cashSum}\n`;
+        csv += `LinePay總額,${lineSum}\n\n`;
 
         // 2) CSV header
         const headers = [
@@ -161,7 +161,7 @@ export default function Table() {
             'itemName',
             'qty',
         ];
-        csvfile += headers.join(',') + '\n';
+        csv += headers.join(',') + '\n';
 
         // 3) Rows
         report.forEach(r => {
@@ -175,12 +175,12 @@ export default function Table() {
                     `"${i.name.replace(/"/g, '""')}"`,
                     i.qty
                 ];
-                csvfile += row.join(',') + '\n';
+                csv += row.join(',') + '\n';
             });
         });
 
         // 4) Download
-        const blob = new Blob([csvfile], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
