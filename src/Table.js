@@ -119,6 +119,19 @@ export default function Table() {
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
+
+        const user = window.prompt('請輸入用戶名以確認結單:');
+        if (user !== VALID_USER) {
+            return alert('用戶名錯誤，已取消。');
+        }
+        const pass = window.prompt('請輸入密碼:');
+        if (pass !== VALID_PASS) {
+            return alert('密碼錯誤，已取消。');
+        }
+
+
+        // —————————————————————
+        // 1) compute summary
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
         report.forEach(r => {
@@ -131,28 +144,28 @@ export default function Table() {
             else if (r.method === 'LinePay') lineSum += r.total;
         });
 
-        // 1) UTF‑8 BOM
-        const BOM = "\uFEFF";
-        
+        // —————————————————————
+        // 2) start building CSV
+        const BOM = "\uFEFF"; // Excel-friendly UTF-8 BOM
+        let csv = BOM;
 
-        // 2) CSV header
-        const headers = [
-            'timestamp',
-            'method',
-            'cardNumber',
-            'total',
-            'itemName',
-            'qty',
-        ];
-        let csv = BOM + headers.join(',') + '\n';
+        // 2a) prepend a human‑readable “今日日報” summary block
+        csv += '項目,總數量\n';
+        Object.entries(itemTotals).forEach(([name, qty]) => {
+            csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
+        });
+        csv += `\n現金總額,${cashSum}\n`;
+        csv += `LinePay總額,${lineSum}\n\n`;
 
-        // 3) Rows
+        // 2b) then output the raw transaction rows
+        const headers = ['timestamp', 'method', 'cardNumber', 'total', 'itemName', 'qty'];
+        csv += headers.join(',') + '\n';
+
         report.forEach(r => {
             r.items.forEach(i => {
                 const row = [
-                    // wrap each text field in quotes, doubling any inner quotes
-                    `"${r.timestamp}"`,
-                    `"${r.method}"`,
+                    `"${r.timestamp.replace(/"/g, '""')}"`,
+                    r.method,
                     `"${(r.cardNumber || '').replace(/"/g, '""')}"`,
                     r.total,
                     `"${i.name.replace(/"/g, '""')}"`,
@@ -162,7 +175,8 @@ export default function Table() {
             });
         });
 
-        // 4) Download
+        // —————————————————————
+        // 3) download trigger
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -170,7 +184,6 @@ export default function Table() {
         a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        
     }, []);
 
     return (
