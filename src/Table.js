@@ -184,6 +184,8 @@ export default function Table() {
         a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+        localStorage.clear();
+        sessionStorage.clear();
     }, []);
 
     return (
