@@ -299,3 +299,72 @@
   width: 3rem;
   text-align: center;
 }
+
+/* overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* your login modal box */
+.login-modal {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  text-align: center;
+}
+.login-modal h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-dark);
+}
+.login-modal input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+}
+
+/* error message */
+.modal-error {
+  color: var(--warn);
+  margin-bottom: 0.75rem;
+}
+
+/* modal buttons */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.modal-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: background 0.2s;
+}
+.modal-actions button:hover {
+  background: darken(var(--accent), 10%);
+}
+.modal-actions button:first-child {
+  background: #ccc;
+  color: #333;
+}
+.modal-actions button:first-child:hover {
+  background: #bbb;
+}
