@@ -114,6 +114,52 @@ export default function Table() {
 
         alert(msg);
     }, []);
+    const exportDailyReportCSV = useCallback(() => {
+        const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        if (report.length === 0) {
+            return alert('今日日報尚無紀錄，無法下載。');
+        }
+
+        // 1) UTF‑8 BOM
+        const BOM = "\uFEFF";
+
+        // 2) CSV header
+        const headers = [
+            'timestamp',
+            'method',
+            'cardNumber',
+            'total',
+            'itemName',
+            'qty',
+        ];
+        let csv = BOM + headers.join(',') + '\n';
+
+        // 3) Rows
+        report.forEach(r => {
+            r.items.forEach(i => {
+                const row = [
+                    // wrap each text field in quotes, doubling any inner quotes
+                    `"${r.timestamp}"`,
+                    `"${r.method}"`,
+                    `"${(r.cardNumber || '').replace(/"/g, '""')}"`,
+                    r.total,
+                    `"${i.name.replace(/"/g, '""')}"`,
+                    i.qty
+                ];
+                csv += row.join(',') + '\n';
+            });
+        });
+
+        // 4) Download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }, []);
+
     return (
         <div className="table">
             <main className="main">
@@ -226,6 +272,13 @@ export default function Table() {
                     style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
                 >
                     今日日報
+                </button>
+                <button
+                    className="export-csv-button"
+                    onClick={exportDailyReportCSV}
+                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
+                >
+                    結單
                 </button>
             </aside>
         </div>
