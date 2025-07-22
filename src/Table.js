@@ -119,9 +119,29 @@ export default function Table() {
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
+        const itemTotals = {};
+        let cashSum = 0, lineSum = 0;
+        report.forEach(r => {
+            // aggregate item qty
+            r.items.forEach(i => {
+                itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
+            });
+            // aggregate payment totals
+            if (r.method === 'Cash') cashSum += r.total;
+            else if (r.method === 'LinePay') lineSum += r.total;
+        });
 
         // 1) UTF‑8 BOM
         const BOM = "\uFEFF";
+        let csvfile = BOM;
+
+        // 2a) prepend a human‑readable “今日日報” summary block
+        csvfile += '項目,總數量\n';
+        Object.entries(itemTotals).forEach(([name, qty]) => {
+            csvfile += `"${name.replace(/"/g, '""')}",${qty}\n`;
+        });
+        csvfile += `\n現金總額,${cashSum}\n`;
+        csvfile += `LinePay總額,${lineSum}\n\n`;
 
         // 2) CSV header
         const headers = [
@@ -132,7 +152,7 @@ export default function Table() {
             'itemName',
             'qty',
         ];
-        let csv = BOM + headers.join(',') + '\n';
+        csvfile += headers.join(',') + '\n';
 
         // 3) Rows
         report.forEach(r => {
@@ -146,18 +166,21 @@ export default function Table() {
                     `"${i.name.replace(/"/g, '""')}"`,
                     i.qty
                 ];
-                csv += row.join(',') + '\n';
+                csvfile += row.join(',') + '\n';
             });
         });
 
         // 4) Download
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csvfile], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload();
     }, []);
 
     return (

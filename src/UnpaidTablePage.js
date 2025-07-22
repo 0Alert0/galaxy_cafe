@@ -113,7 +113,7 @@ export default function UnpaidTablePage() {
 
                             <h2>{o.tableId}</h2>
                             <p><strong>人數:</strong> {o.guests}</p>
-                            <p><strong>總共金額:</strong> ${o.total }</p>
+                            <p><strong>總共金額:</strong> ${o.total}</p>
 
                             <button
                                 className="view-btn"
@@ -152,13 +152,33 @@ export default function UnpaidTablePage() {
                             {orders[splitIndex].items.map(it => (
                                 <li key={it.id}>
                                     <span>{it.name} (最多{it.qty})</span>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        max={it.qty}
-                                        value={splitQtys[it.id] ?? 0}
-                                        onChange={e => changeSplitQty(it.id, Number(e.target.value))}
-                                    />
+                                    <div className="split-qty-group">
+                                        <button
+                                            className="split-btn minus"
+                                            onClick={() =>
+                                                changeSplitQty(it.id, (splitQtys[it.id] || 0) - 1)
+                                            }
+                                            disabled={(splitQtys[it.id] || 0) <= 0}
+                                        >
+                                            –
+                                        </button>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max={it.qty}
+                                            value={splitQtys[it.id] ?? 0}
+                                            onChange={e => changeSplitQty(it.id, Number(e.target.value))}
+                                        />
+                                        <button
+                                            className="split-btn plus"
+                                            onClick={() =>
+                                                changeSplitQty(it.id, (splitQtys[it.id] || 0) + 1)
+                                            }
+                                            disabled={(splitQtys[it.id] || 0) >= it.qty}
+                                        >
+                                            ＋
+                                        </button>
+                                    </div>
                                 </li>
                             ))}
                         </ul>

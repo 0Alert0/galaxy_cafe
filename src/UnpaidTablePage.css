@@ -209,3 +209,39 @@
   background: var(--accent);
   color: #fff;
 }
+
+/* wrap the input + buttons */
+.split-qty-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* style those tiny +/- buttons */
+.split-qty-group .split-btn {
+  width: 2rem;
+  height: 2rem;
+  line-height: 1;
+  border: 1px solid #ccc;
+  background: #f0f0f0;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.1s;
+  color: #000;
+}
+
+.split-qty-group .split-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+}
+
+.split-qty-group .split-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* keep the input nice and centered */
+.split-qty-group input {
+  width: 3rem;
+  text-align: center;
+}
