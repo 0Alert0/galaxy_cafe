@@ -119,14 +119,10 @@ export default function Table() {
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
-        const user = window.prompt('請輸入用戶名以確認結單:');
-        if (user !== VALID_USER) {
-            return alert('用戶名錯誤，已取消。');
-        }
-        const pass = window.prompt('請輸入密碼:');
-        if (pass !== VALID_PASS) {
-            return alert('密碼錯誤，已取消。');
-        }
+        const user = prompt('Username:');
+        if (user !== 'admin') { alert('Wrong username'); return; }
+        const pass = prompt('Password:');
+        if (pass !== '1234') { alert('Wrong password'); return; }
 
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
