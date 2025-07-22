@@ -275,3 +275,27 @@
     padding: 1rem;
   }
 }
+
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.qty-controls button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  background: #f8f8f8;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.qty-controls button:hover {
+  background: #e0e0e0;
+}
+
+.qty-input {
+  width: 3rem;
+  text-align: center;
+}

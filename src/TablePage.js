@@ -20,17 +20,48 @@ export default function TablePage() {
 
   // add an item only once per click
   const handleAdd = useCallback(item => {
-    setCart(prev =>
-      prev.some(i => i.id === item.id)
-        ? prev
-        : [...prev, { id: item.id, name: item.label, price: item.price ?? 0, qty: 1 }]
-    );
+    setCart(prev => {
+      const exists = prev.find(i => i.id === item.id);
+      if (exists) {
+        return prev.map(i =>
+          i.id === item.id
+            ? { ...i, qty: Number(i.qty) + 1 }
+            : i
+        );
+      } else {
+        return [
+          ...prev,
+          { id: item.id, name: item.label, price: item.price ?? 0, qty: 1 }
+        ];
+      }
+    });
   }, []);
 
   // change quantity manually
   const handleQtyChange = useCallback((itemId, newQty) => {
     setCart(prev =>
       prev.map(i => (i.id === itemId ? { ...i, qty: newQty } : i))
+    );
+  }, []);
+  const incrementQty = useCallback(itemId => {
+    setCart(prev =>
+      prev.map(i =>
+        i.id === itemId
+          ? { ...i, qty: Number(i.qty) + 1 }
+          : i
+      )
+    );
+  }, []);
+
+  const decrementQty = useCallback(itemId => {
+    setCart(prev =>
+      prev.map(i => {
+        if (i.id === itemId) {
+          const next = Number(i.qty) - 1;
+          return { ...i, qty: next > 1 ? next : 1 };
+        }
+        return i;
+      })
     );
   }, []);
 
@@ -239,13 +270,19 @@ export default function TablePage() {
           {cart.map(it => (
             <li key={it.id}>
               <span className="name">{it.name}</span>
-              <input
-                type="number"
-                className="qty-input"
-                min="1"
-                value={it.qty}
-                onChange={e => handleQtyChange(it.id, e.target.value)}
-              />
+              <div className="qty-controls">
+                <button onClick={() => decrementQty(it.id)}>-</button>
+                <input
+                  type="number"
+                  className="qty-input"
+                  min="1"
+                  value={it.qty}
+                  onChange={e =>
+                    handleQtyChange(it.id, e.target.value)
+                  }
+                />
+                <button onClick={() => incrementQty(it.id)}>＋</button>
+              </div>
               <span className="price">${(it.price * it.qty)}</span>
               <button
                 className="remove-item"

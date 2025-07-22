@@ -109,8 +109,8 @@ export default function Table() {
         const msg =
             `今日日報\n\n` +
             `項目總數量:\n${itemsMsg}\n\n` +
-            `現金總額: $${cashSum.toFixed(2)}\n` +
-            `LinePay 總額: $${lineSum.toFixed(2)}`;
+            `現金總額: $${cashSum}\n` +
+            `LinePay 總額: $${lineSum}`;
 
         alert(msg);
     }, []);
