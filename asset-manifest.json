@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/galaxy_cafe/static/css/main.a0b269cb.css",
-    "main.js": "/galaxy_cafe/static/js/main.35517fbb.js",
+    "main.css": "/galaxy_cafe/static/css/main.ac452c08.css",
+    "main.js": "/galaxy_cafe/static/js/main.c0fbda13.js",
     "static/js/453.860ab39b.chunk.js": "/galaxy_cafe/static/js/453.860ab39b.chunk.js",
     "index.html": "/galaxy_cafe/index.html",
-    "main.a0b269cb.css.map": "/galaxy_cafe/static/css/main.a0b269cb.css.map",
-    "main.35517fbb.js.map": "/galaxy_cafe/static/js/main.35517fbb.js.map",
+    "main.ac452c08.css.map": "/galaxy_cafe/static/css/main.ac452c08.css.map",
+    "main.c0fbda13.js.map": "/galaxy_cafe/static/js/main.c0fbda13.js.map",
     "453.860ab39b.chunk.js.map": "/galaxy_cafe/static/js/453.860ab39b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.a0b269cb.css",
-    "static/js/main.35517fbb.js"
+    "static/css/main.ac452c08.css",
+    "static/js/main.c0fbda13.js"
   ]
 }
