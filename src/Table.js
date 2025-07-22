@@ -18,6 +18,11 @@ export default function Table() {
     const [clockedInAt, setClockedInAt] = useState(() => localStorage.getItem('clockedInAt'));
     const [unpaidTables, setUnpaidTables] = useState([]);
     const [takeoutCount, setTakeoutCount] = useState(0);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalUser, setModalUser] = useState('');
+    const [modalPass, setModalPass] = useState('');
+    const [modalError, setModalError] = useState('');
+
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
@@ -120,17 +125,6 @@ export default function Table() {
             return alert('今日日報尚無紀錄，無法下載。');
         }
 
-        const user = window.prompt('請輸入用戶名以確認結單:');
-        if (user !== VALID_USER) {
-            return alert('用戶名錯誤，已取消。');
-        }
-        const pass = window.prompt('請輸入密碼:');
-        if (pass !== VALID_PASS) {
-            return alert('密碼錯誤，已取消。');
-        }
-
-
-        // —————————————————————
         // 1) compute summary
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
@@ -184,12 +178,21 @@ export default function Table() {
         a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-        setTimeout(() => {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.reload();
-        }, 500);
+        setModalVisible(false);
+        localStorage.clear();
+        sessionStorage.clear();
     }, []);
+    const onEndOfDayClick = () => {
+        const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        if (report.length === 0) {
+            return alert('今日日報尚無紀錄，無法下載。');
+        }
+
+        setModalError('');
+        setModalUser('');
+        setModalPass('');
+        setModalVisible(true);
+    };
 
     return (
         <div className="table">
@@ -306,12 +309,46 @@ export default function Table() {
                 </button>
                 <button
                     className="export-csv-button"
-                    onClick={exportDailyReportCSV}
+                    onClick={onEndOfDayClick}
                     style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
                     結單
                 </button>
             </aside>
+            {modalVisible && (
+                <div className="modal-overlay">
+                    <div className="login-modal">
+                        <h2>請輸入管理員認證</h2>
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            value={modalUser}
+                            onChange={e => setModalUser(e.target.value)}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Password"
+                            value={modalPass}
+                            onChange={e => setModalPass(e.target.value)}
+                        />
+                        {modalError && <div className="modal-error">{modalError}</div>}
+                        <div className="modal-actions">
+                            <button onClick={() => setModalVisible(false)}>取消</button>
+                            <button onClick={() => {
+                                if (modalUser !== VALID_USER) {
+                                    setModalError('使用者錯誤');
+                                } else if (modalPass !== VALID_PASS) {
+                                    setModalError('密碼錯誤');
+                                } else {
+                                    exportDailyReportCSV();
+                                }
+                            }}>
+                                確認下載
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
