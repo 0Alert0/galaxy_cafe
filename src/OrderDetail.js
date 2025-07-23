@@ -97,9 +97,24 @@ export default function OrderDetail() {
             cardNumber,
             discount: discountNum,
             customAmount: customNum
-                                   // if any, else ''
+            // if any, else ''
         });
         localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
+
+        const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+        monthly.push({
+            timestamp: now,
+            tableId,
+            guests,
+            items: items.map(i => ({ id: i.id, name: i.name, qty: i.qty })),
+            total: finalTotal,
+            method,
+            cardNumber,
+            discount: discountNum,
+            customAmount: customNum
+        });
+        localStorage.setItem('monthlyReport', JSON.stringify(monthly));
+        
         if (source === 'unpaid') {
             // Remove from unpaidOrders
             const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');

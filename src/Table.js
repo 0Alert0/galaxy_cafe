@@ -9,6 +9,7 @@ const ALLOWED_PUBLIC_IP = '42.76.215.17';
 
 export default function Table() {
     const navigate = useNavigate();
+    const goReports = () => navigate('/report');
 
     // ─── State ────────────────────────────────────────────────────
     const [dailyTotal, setDailyTotal] = useState(0);
@@ -213,8 +214,16 @@ export default function Table() {
         a.click();
         URL.revokeObjectURL(url);
         setModalVisible(false);
+        const monthly = localStorage.getItem('monthlyReport');
+
+        // clear everything
         localStorage.clear();
         sessionStorage.clear();
+
+        // put dailyreport back
+        if (monthly !== null) {
+            localStorage.setItem('monthlyReport', monthly);
+        }
     }, []);
     const onEndOfDayClick = () => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
@@ -347,6 +356,13 @@ export default function Table() {
                     style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
                     結單
+                </button>
+                <button
+                    className="analysis"
+                    onClick={goReports}
+                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
+                >
+                    Analysis
                 </button>
             </aside>
             {modalVisible && (
