@@ -159,7 +159,7 @@ export default function Table() {
         csv += `LinePay總額,${lineSum}\n\n`;
 
         // 2b) then output the raw transaction rows
-        const headers = ['timestamp', 'method', 'cardNumber', 'total', 'itemName', 'qty'];
+        const headers = ['timestamp', 'method', 'cardNumber', 'itemName', 'qty'];
         csv += headers.join(',') + '\n';
 
         report.forEach(r => {
@@ -168,7 +168,6 @@ export default function Table() {
                     `"${r.timestamp.replace(/"/g, '""')}"`,
                     r.method,
                     `"${(r.cardNumber || '').replace(/"/g, '""')}"`,
-                    r.total,
                     `"${i.name.replace(/"/g, '""')}"`,
                     i.qty
                 ];
@@ -182,7 +181,7 @@ export default function Table() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `dailyreport_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
         setModalVisible(false);
