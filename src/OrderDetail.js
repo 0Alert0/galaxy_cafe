@@ -84,7 +84,9 @@ export default function OrderDetail() {
             `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
             `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         dailyReport.push({
-            timestamp: now,                    // ISO string timestamp
+            timestamp: now,
+            tableId,
+            guests,                    // ISO string timestamp
             items: items.map(i => ({          // copy id/name/qty
                 id: i.id,
                 name: i.name,
@@ -92,7 +94,10 @@ export default function OrderDetail() {
             })),
             total: finalTotal,                // final total paid
             method,                           // 'Cash' or 'LinePay'
-            cardNumber                       // if any, else ''
+            cardNumber,
+            discount: discountNum,
+            customAmount: customNum
+                                   // if any, else ''
         });
         localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
         if (source === 'unpaid') {

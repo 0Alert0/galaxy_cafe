@@ -125,7 +125,7 @@ export default function Table() {
     }, []);
     const exportDailyReportCSV = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-         const time = localStorage.getItem('clockedInAt') || '';
+        const time = localStorage.getItem('clockedInAt') || '';
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
@@ -150,7 +150,7 @@ export default function Table() {
 
         // 2a) prepend a human‑readable “今日日報” summary block
         csv += '打卡時間\n';
-        csv += time+ "\n";
+        csv += time + "\n";
         csv += '項目,總數量\n';
         Object.entries(itemTotals).forEach(([name, qty]) => {
             csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
@@ -159,18 +159,46 @@ export default function Table() {
         csv += `LinePay總額,${lineSum}\n\n`;
 
         // 2b) then output the raw transaction rows
-        const headers = ['timestamp', 'method', 'cardNumber', 'itemName', 'qty'];
+        const headers = [
+            'timestamp',
+            'tableId',
+            'guests',
+            'total',
+            'method',
+            'cardNumber',
+            'discount',
+            'customAmount',
+            'itemName',
+            'qty'
+        ];
         csv += headers.join(',') + '\n';
 
+        const txnCols = 8;
+
         report.forEach(r => {
-            r.items.forEach(i => {
-                const row = [
-                    `"${r.timestamp.replace(/"/g, '""')}"`,
-                    r.method,
-                    `"${(r.cardNumber || '').replace(/"/g, '""')}"`,
+            r.items.forEach((i, idx) => {
+                const row = [];
+                if (idx === 0) {
+                    // first item: emit all txn‑level fields
+                    row.push(
+                        `"${r.timestamp.replace(/"/g, '""')}"`,
+                        `"${r.tableId}"`,
+                        `"${r.guests}"`,
+                        r.total,
+                        `"${r.method}"`,
+                        `"${(r.cardNumber || '').replace(/"/g, '""')}"`,
+                        r.discount ?? '',
+                        r.customAmount ?? ''
+                    );
+                } else {
+                    // subsequent items: blank placeholders
+                    for (let j = 0; j < txnCols; j++) row.push('');
+                }
+                // then always emit the item columns
+                row.push(
                     `"${i.name.replace(/"/g, '""')}"`,
                     i.qty
-                ];
+                );
                 csv += row.join(',') + '\n';
             });
         });
