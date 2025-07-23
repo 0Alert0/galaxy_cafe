@@ -5,7 +5,7 @@ import './Table.css';
 
 const VALID_USER = 'admin';
 const VALID_PASS = '1234';
-const ALLOWED_PUBLIC_IP = '42.76.215.177';
+const ALLOWED_PUBLIC_IP = '42.76.215.17';
 
 export default function Table() {
     const navigate = useNavigate();
@@ -65,9 +65,9 @@ export default function Table() {
         if (!publicIp) {
             return alert('Unable to verify network. Try again shortly.');
         }
-        if (publicIp !== ALLOWED_PUBLIC_IP) {
+        /*if (publicIp !== ALLOWED_PUBLIC_IP) {
             return alert(`Clock‑in only allowed from office network (your IP: ${publicIp})`);
-        }
+        }*/
         const d = new Date();
         const pad2 = n => String(n).padStart(2, '0');
         const now =
