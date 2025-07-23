@@ -5,7 +5,7 @@ import './Table.css';
 
 const VALID_USER = 'admin';
 const VALID_PASS = '1234';
-const ALLOWED_PUBLIC_IP = '182.234.211.104';
+const ALLOWED_PUBLIC_IP = '42.76.215.177';
 
 export default function Table() {
     const navigate = useNavigate();
@@ -68,7 +68,11 @@ export default function Table() {
         if (publicIp !== ALLOWED_PUBLIC_IP) {
             return alert(`Clock‑in only allowed from office network (your IP: ${publicIp})`);
         }
-        const now = new Date().toLocaleTimeString();
+        const d = new Date();
+        const pad2 = n => String(n).padStart(2, '0');
+        const now =
+            `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
+            `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         setClockedInAt(now);
         localStorage.setItem('clockedInAt', now);
     }, [username, password, publicIp]);
@@ -121,6 +125,7 @@ export default function Table() {
     }, []);
     const exportDailyReportCSV = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+         const time = localStorage.getItem('clockedInAt') || '';
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
@@ -144,6 +149,8 @@ export default function Table() {
         let csv = BOM;
 
         // 2a) prepend a human‑readable “今日日報” summary block
+        csv += '打卡時間\n';
+        csv += time+ "\n";
         csv += '項目,總數量\n';
         Object.entries(itemTotals).forEach(([name, qty]) => {
             csv += `"${name.replace(/"/g, '""')}",${qty}\n`;

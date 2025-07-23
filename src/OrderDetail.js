@@ -76,9 +76,13 @@ export default function OrderDetail() {
             timestamp: new Date().toISOString()
         });
         localStorage.setItem('salesLog', JSON.stringify(salesLog));
-        
+
         const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-        const now = new Date().toISOString();
+        const d = new Date();
+        const pad2 = n => String(n).padStart(2, '0');
+        const now =
+            `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
+            `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         dailyReport.push({
             timestamp: now,                    // ISO string timestamp
             items: items.map(i => ({          // copy id/name/qty
