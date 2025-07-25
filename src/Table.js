@@ -245,7 +245,7 @@ export default function Table() {
                         className="shape square light"
                         onClick={() => handleClick('Take Out')}
                     >
-                        Take out
+                        外帶
                     </button>
                     {renderBtn('A1', 'shape hrectangle light')}
                     {renderBtn('A2', 'shape vrectangle light')}
@@ -356,7 +356,7 @@ export default function Table() {
                     onClick={goReports}
                     style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
-                    Analysis
+                    月報
                 </button>
                 {/*<button
                     className="clear-storage-button"
