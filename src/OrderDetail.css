@@ -31,6 +31,7 @@
     inset 4px 4px 8px var(--shadow-dark),
     inset -4px -4px 8px var(--shadow-light);
   margin-bottom: 2rem;
+ 
 }
 .od-methods button {
   flex: 1;
@@ -40,6 +41,7 @@
   border-radius: 50px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 1.5rem;
   color: var(--text-muted);
   transition: 
     color 0.2s,
@@ -109,13 +111,14 @@
 /* Summary */
 .od-summary {
   margin-bottom: 2rem;
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   line-height: 1.6;
 }
 .od-summary > div {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
+  font-size: 1.5rem;
 }
 .od-summary input {
   width: 6rem;
@@ -127,6 +130,8 @@
     inset 4px 4px 8px var(--shadow-dark),
     inset -4px -4px 8px var(--shadow-light);
   transition: box-shadow 0.2s;
+  font-size: 1.5rem;
+  
 }
 .od-summary input:focus {
   outline: none;
@@ -184,4 +189,5 @@
 .custom-input,
 .card-input {
   margin-top: 1rem;
+  font-size: 1.5rem;
 }
