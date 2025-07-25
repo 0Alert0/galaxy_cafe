@@ -19,6 +19,11 @@
 
 .main {
   flex: 1;
+  align-items: center;
+  overflow-y: auto;
+  justify-content: center;
+  height: 100vh;
+
 }
 
 .container1 {
@@ -45,7 +50,8 @@
   gap: 2rem;
   /* initial A5 offset */
   margin-top: calc(50px);
-  margin-right: calc(70px);
+  margin-right: calc(60px);
+
 }
 
 /* ─── C-GROUP (C1–C5) ─────────────────────────────────────────────────── */
@@ -65,11 +71,13 @@
   justify-content: center;
   margin-top: 2rem;
 }
-.a-top-group > button:first-child {
+
+.a-top-group>button:first-child {
   margin-right: 6rem;
 }
-.a-top-group > button:nth-child(2),
-.a-top-group > button:nth-child(3) {
+
+.a-top-group>button:nth-child(2),
+.a-top-group>button:nth-child(3) {
   margin-left: 0.7rem;
 }
 
@@ -80,11 +88,13 @@
   justify-content: center;
   margin-left: calc(100px);
 }
-.a-bottom-group > button:first-child {
+
+.a-bottom-group>button:first-child {
   margin-right: 1rem;
   margin-top: 3rem;
 }
-.a-bottom-group > button:nth-child(2) {
+
+.a-bottom-group>button:nth-child(2) {
   margin-right: 3.5rem;
 }
 
@@ -127,10 +137,21 @@
 }
 
 @keyframes bounce-down {
-  0%   { transform: translateY(-3px); }
-  30%  { transform: translateY(8px); }
-  60%  { transform: translateY(4px); }
-  100% { transform: translateY(8px); }
+  0% {
+    transform: translateY(-3px);
+  }
+
+  30% {
+    transform: translateY(8px);
+  }
+
+  60% {
+    transform: translateY(4px);
+  }
+
+  100% {
+    transform: translateY(8px);
+  }
 }
 
 .shape:active {
@@ -170,6 +191,7 @@
   color: #fff !important;
   pointer-events: none;
 }
+
 .shape.unpaid::after {
   content: '未付';
   position: absolute;
@@ -195,7 +217,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  align-self: stretch;
+  overflow-y: auto;
 }
 
 .right-sidebar button {
@@ -236,8 +258,11 @@
 /* ─── Modal Overlay & Login ──────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -293,7 +318,8 @@
 }
 
 .modal-actions button:hover {
-  background: #248a3f; /* slightly darker accent */
+  background: #248a3f;
+  /* slightly darker accent */
 }
 
 .modal-actions button:first-child {
@@ -307,6 +333,7 @@
 
 /* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
 @media (min-width: 1024px) {
+
   /* Sidebar */
   .right-sidebar {
     width: 280px;
@@ -328,16 +355,15 @@
 
 /* ── iPad‑height fix for vh handling ───────────────────────────────────── */
 @supports (height: 100vh) {
-  html, body {
+
+  html,
+  body {
     height: 100%;
     margin: 0;
   }
-  .table, .right-sidebar {
+
+  .table,
+  .right-sidebar {
     height: 100%;
   }
-}
-
-/* ── Adjust A5 downward on larger layouts ─────────────────────────────── */
-.container3 .A5 {
-  margin-top: 3rem;
 }
