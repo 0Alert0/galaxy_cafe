@@ -334,3 +334,21 @@
 }
 
 /* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
+@media (min-width: 1024px) {
+
+  /* Sidebar */
+  .right-sidebar {
+    width: 280px;
+    padding: 1.5rem;
+  }
+
+  /* Sidebar buttons */
+  .right-sidebar button {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+}
+
+
