@@ -272,13 +272,15 @@
 .login-modal {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  padding: 1.5rem;
+  padding: 2rem;             /* more padding */
   border-radius: 8px;
-  width: 90%;
-  max-width: 320px;
-  box-shadow: 0 4px 12px var(--shadow-light);
+  width: 80%;                /* take up more of the viewport */
+  max-width: 600px;          /* allow it to grow larger on big screens */
+  box-shadow: 0 6px 16px var(--shadow-light);
   text-align: center;
+  
 }
+
 
 .login-modal h2 {
   margin-top: 0;
@@ -332,38 +334,3 @@
 }
 
 /* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
-@media (min-width: 1024px) {
-
-  /* Sidebar */
-  .right-sidebar {
-    width: 280px;
-    padding: 1.5rem;
-  }
-
-  /* Sidebar buttons */
-  .right-sidebar button {
-    padding: 1.25rem 1.5rem;
-    font-size: 1.25rem;
-    line-height: 1.2;
-  }
-
-  /* More gap between floorplan and sidebar */
-  .table {
-    gap: 3rem;
-  }
-}
-
-/* ── iPad‑height fix for vh handling ───────────────────────────────────── */
-@supports (height: 100vh) {
-
-  html,
-  body {
-    height: 100%;
-    margin: 0;
-  }
-
-  .table,
-  .right-sidebar {
-    height: 100%;
-  }
-}
