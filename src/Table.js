@@ -336,14 +336,7 @@ export default function Table() {
                     </button>
                 </form>
 
-                <button
-                    className="clear-storage-button"
-                    onClick={clearAll}
-                    style={{ marginTop: '1rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
-                >
-                    Clear All Storage
-                </button>
-
+                
                 <button
                     className="show-summary-button"
                     onClick={showDailySummary}
@@ -365,6 +358,13 @@ export default function Table() {
                 >
                     Analysis
                 </button>
+                {/*<button
+                    className="clear-storage-button"
+                    onClick={clearAll}
+                    style={{ marginTop: '1rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
+                >
+                    Clear All Storage
+                </button>*/}
             </aside>
             {modalVisible && (
                 <div className="modal-overlay">
