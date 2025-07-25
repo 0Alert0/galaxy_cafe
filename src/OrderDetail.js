@@ -218,7 +218,7 @@ export default function OrderDetail() {
                     <label>
                         寄杯卡號:&nbsp;
                         <input
-                            type="number"
+                            type="text"
                             value={cardNumber}
                             onChange={e => setCardNumber(e.target.value)}
                             placeholder="輸入卡號"
