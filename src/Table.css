@@ -14,12 +14,11 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 2rem;
+  background: var(--bg);
 }
 
-/* let the main floorplan take up all available space */
 .main {
   flex: 1;
-
 }
 
 .container1 {
@@ -44,9 +43,12 @@
   flex-direction: row;
   justify-content: center;
   gap: 2rem;
+  /* initial A5 offset */
+  margin-top: calc(50px);
+  margin-right: calc(70px);
 }
 
-/* ─── C-GROUP (C1–C4 ) ─────────────────────────────────────────────────── */
+/* ─── C-GROUP (C1–C5) ─────────────────────────────────────────────────── */
 .c-group {
   display: flex;
   flex-direction: column;
@@ -55,7 +57,7 @@
   gap: 2rem;
 }
 
-/* ─ A-TOP-GROUP ( A1 A2) ───────────────────────────────────────────────── */
+/* ─ A-TOP-GROUP (Take Out, A1, A2) ─────────────────────────────────────── */
 .a-top-group {
   display: flex;
   flex-direction: row;
@@ -63,31 +65,30 @@
   justify-content: center;
   margin-top: 2rem;
 }
-
-.a-top-group>button:first-child {
+.a-top-group > button:first-child {
   margin-right: 6rem;
 }
-
-.a-top-group>button:nth-child(2) {
+.a-top-group > button:nth-child(2),
+.a-top-group > button:nth-child(3) {
   margin-left: 0.7rem;
 }
 
-.a-top-group>button:nth-child(3) {
-  margin-left: 0.7rem;
-}
-
+/* ─ A-BOTTOM-GROUP (A6, A4, A3) ───────────────────────────────────────── */
 .a-bottom-group {
   display: flex;
   gap: 1rem;
   justify-content: center;
   margin-left: calc(100px);
 }
-
-.a-bottom-group>button:first-child {
-  margin-right: 5rem;
+.a-bottom-group > button:first-child {
+  margin-right: 1rem;
+  margin-top: 3rem;
+}
+.a-bottom-group > button:nth-child(2) {
+  margin-right: 3.5rem;
 }
 
-/* ─ B-MAIN-GROUP (B4–B1) ─────────────────────────────────────────────────── */
+/* ─ B-TOP-GROUP (B4–B1) ───────────────────────────────────────────────── */
 .b-top-group {
   display: flex;
   flex-direction: row;
@@ -96,23 +97,22 @@
   margin-top: 1rem;
 }
 
-/* B top row: B5-B9 */
+/* ─ B-MID-GROUP (B5–B9) ───────────────────────────────────────────────── */
 .b-mid-group {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-/* B column:B10-B12 under B3 */
+/* ─ B-BOTTOM-GROUP (B10–B12) ──────────────────────────────────────────── */
 .b-bottom-group {
   display: flex;
   flex-direction: row;
   gap: 1rem;
-  margin-left: calc(100px + 1rem);
+  margin-left: calc(50px);
 }
 
-
-/* ─── SHAPES ──────────────────────────────────────────────────────────────── */
+/* ─── SHAPES ───────────────────────────────────────────────────────────── */
 .shape {
   position: relative;
   display: flex;
@@ -127,21 +127,17 @@
 }
 
 @keyframes bounce-down {
-  /* start lifted (your hover state) */
   0%   { transform: translateY(-3px); }
-  /* slam down */
   30%  { transform: translateY(8px); }
-  /* little rebound up */
   60%  { transform: translateY(4px); }
-  /* stay down at 8px */
   100% { transform: translateY(8px); }
 }
 
 .shape:active {
   animation: bounce-down 0.4s ease-out forwards;
-  /* softer shadow while “pressed” */
   box-shadow: 0 4px 8px var(--shadow-light);
 }
+
 .square {
   width: 40px;
   height: 40px;
@@ -163,11 +159,33 @@
   border-radius: 50%;
 }
 
-/* Shading helpers */
 .light {
   background-color: #e0e0e0;
 }
 
+/* ─── Unpaid Indicator ─────────────────────────────────────────────────── */
+.shape.unpaid {
+  background-color: var(--warn) !important;
+  border-color: var(--warn) !important;
+  color: #fff !important;
+  pointer-events: none;
+}
+.shape.unpaid::after {
+  content: '未付';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: top;
+  justify-content: right;
+  font-size: 0.45rem;
+  font-weight: bold;
+  pointer-events: none;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────── */
 .right-sidebar {
   width: 200px;
   padding: 1rem;
@@ -180,7 +198,6 @@
   align-self: stretch;
 }
 
-/* style the buttons */
 .right-sidebar button {
   background: #eeeeee;
   border: none;
@@ -199,16 +216,15 @@
 }
 
 .right-sidebar .badge {
+  display: inline-block;
   background: var(--warn);
-
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 999px;
+  margin-left: 0.5rem;
   transform: translateX(4px);
 }
-
-/*.right-sidebar h4 {
-  margin: 0 0 0.5rem;
-  font-size: 1rem;
-}*/
-
 
 .daily-sales {
   font-weight: bold;
@@ -217,44 +233,7 @@
   margin-top: 1rem;
 }
 
-
-/* anywhere in your Table.css */
-
-.shape.unpaid {
-  background-color: var(--warn) !important;
-  border-color: var(--warn) !important;
-  color: #fff !important;
-  pointer-events: none;
-}
-
-/* Overlay “未付” centered atop the button */
-.shape.unpaid::after {
-  content: '未付';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: top;
-  justify-content: right;
-  font-size: 0.45rem;
-  font-weight: bold;
-  pointer-events: none;
-}
-
-/* red bubble badge */
-.badge {
-  display: inline-block;
-  background: var(--accent);
-  color: #fff;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 999px;
-  margin-left: 0.5rem;
-}
-
-/* overlay */
+/* ─── Modal Overlay & Login ──────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -265,7 +244,6 @@
   z-index: 1000;
 }
 
-/* your login modal box */
 .login-modal {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -276,11 +254,13 @@
   box-shadow: 0 4px 12px var(--shadow-light);
   text-align: center;
 }
+
 .login-modal h2 {
   margin-top: 0;
   margin-bottom: 1rem;
-  color: var(--text-dark);
+  color: #333;
 }
+
 .login-modal input {
   width: 100%;
   padding: 0.5rem;
@@ -289,18 +269,17 @@
   border-radius: 4px;
 }
 
-/* error message */
 .modal-error {
   color: var(--warn);
   margin-bottom: 0.75rem;
 }
 
-/* modal buttons */
 .modal-actions {
   display: flex;
   justify-content: space-between;
   gap: 0.5rem;
 }
+
 .modal-actions button {
   flex: 1;
   padding: 0.5rem;
@@ -312,13 +291,53 @@
   color: #fff;
   transition: background 0.2s;
 }
+
 .modal-actions button:hover {
-  background: darken(var(--accent), 10%);
+  background: #248a3f; /* slightly darker accent */
 }
+
 .modal-actions button:first-child {
   background: #ccc;
   color: #333;
 }
+
 .modal-actions button:first-child:hover {
   background: #bbb;
+}
+
+/* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
+@media (min-width: 1024px) {
+  /* Sidebar */
+  .right-sidebar {
+    width: 280px;
+    padding: 1.5rem;
+  }
+
+  /* Sidebar buttons */
+  .right-sidebar button {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  /* More gap between floorplan and sidebar */
+  .table {
+    gap: 3rem;
+  }
+}
+
+/* ── iPad‑height fix for vh handling ───────────────────────────────────── */
+@supports (height: 100vh) {
+  html, body {
+    height: 100%;
+    margin: 0;
+  }
+  .table, .right-sidebar {
+    height: 100%;
+  }
+}
+
+/* ── Adjust A5 downward on larger layouts ─────────────────────────────── */
+.container3 .A5 {
+  margin-top: 3rem;
 }

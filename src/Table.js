@@ -5,7 +5,7 @@ import './Table.css';
 
 const VALID_USER = 'admin';
 const VALID_PASS = '1234';
-const ALLOWED_PUBLIC_IP = '42.76.215.17';
+const ALLOWED_PUBLIC_IP = '119.15.214.56';
 
 export default function Table() {
     const navigate = useNavigate();
@@ -66,9 +66,9 @@ export default function Table() {
         if (!publicIp) {
             return alert('Unable to verify network. Try again shortly.');
         }
-        /*if (publicIp !== ALLOWED_PUBLIC_IP) {
+        if (publicIp !== ALLOWED_PUBLIC_IP) {
             return alert(`Clock‑in only allowed from office network (your IP: ${publicIp})`);
-        }*/
+        }
         const d = new Date();
         const pad2 = n => String(n).padStart(2, '0');
         const now =
@@ -262,21 +262,22 @@ export default function Table() {
                         <div className="b-mid-group">
                             {['B5', 'B6', 'B7', 'B8', 'B9'].map(id => renderBtn(id))}
                         </div>
+                        <div className="b-bottom-group">
+                            {['B10', 'B11', 'B12'].map(id => renderBtn(id))}
+                        </div>
                     </div>
                 </div>
 
                 <div className="container3">
-                    <div className="A5">{renderBtn('A5', 'shape vrectangle light')}</div>
-                    <div className="b-bottom-group">
-                        {['B10', 'B11', 'B12'].map(id => renderBtn(id))}
+                    <div className="a-bottom-group">
+                        {renderBtn('A5', 'shape vrectangle light')}
+                        {renderBtn('A6', 'shape circle light')}
+                        {renderBtn('A4', 'shape vrectangle light')}
+                        {renderBtn('A3', 'shape vrectangle light')}
                     </div>
+
                 </div>
 
-                <div className="a-bottom-group">
-                    {renderBtn('A6', 'shape circle light')}
-                    {renderBtn('A4', 'shape vrectangle light')}
-                    {renderBtn('A3', 'shape vrectangle light')}
-                </div>
             </main>
 
             <aside className="right-sidebar">
