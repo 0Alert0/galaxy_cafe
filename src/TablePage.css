@@ -13,7 +13,7 @@
 /* ===== Overall ===== */
 .tablepage {
   display: flex;
-  height: 90vh;
+  height: 95vh;
   background: var(--bg-light);
   font-family: 'Segoe UI', sans-serif;
 }
