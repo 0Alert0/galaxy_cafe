@@ -53,8 +53,8 @@ export default function OrderDetail() {
     const { tableId, guests, items, total } = order;
     const discountNum = Number(discount) || 0;
     const discountedTotal = Math.max(0, total - discountNum);
-    const customNum = Number(customAmount) || 0;
-    const finalTotal = customNum > 0 ? customNum : discountedTotal;
+    const customNum = Number(customAmount);
+    const finalTotal = customAmount !== "" ? customNum : discountedTotal; // else use the computed discounted price
 
     // ─── Handlers ─────────────────────────────────────────────────
     function goBack() {
@@ -114,7 +114,7 @@ export default function OrderDetail() {
             customAmount: customNum
         });
         localStorage.setItem('monthlyReport', JSON.stringify(monthly));
-        
+
         if (source === 'unpaid') {
             // Remove from unpaidOrders
             const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
@@ -198,7 +198,7 @@ export default function OrderDetail() {
                             type="number"
                             value={discount}
                             onChange={e => setDiscount(e.target.value)}
-                            placeholder="0"
+                            placeholder=""
                             disabled={customNum > 0}
                         />
                     </label>
@@ -210,7 +210,7 @@ export default function OrderDetail() {
                             type="number"
                             value={customAmount}
                             onChange={e => setCustomAmount(e.target.value)}
-                            placeholder="0"
+                            placeholder=""
                         />
                     </label>
                 </div>
