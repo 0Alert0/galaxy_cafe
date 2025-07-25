@@ -108,7 +108,7 @@ export default function TablePage() {
       { id: 'hot-oolong-tea', label: '(熱) 烏龍茶', sub: '(Hot) Oolong Tea', price: 80 },
       { id: 'hot-four-season-tea', label: '(熱) 四季春茶', sub: '(Hot) Four Season Tea', price: 80 },
       { id: 'hot-jhinhsuan-tea', label: '(熱) 金萱茶', sub: '(Hot) Jhinhsuan Tea', price: 150 },
-      { id: 'hot-black-tea', label: '(熱) 韻香紅茶', sub: '(Hot) Black Tea', price: 150 },
+      { id: 'hot-black-honyun-tea', label: '(熱) 韻香紅茶', sub: '(Hot) Black Honyun Tea', price: 150 },
       { id: 'hot-osmanthus-oolong-tea', label: '(熱) 桂花烏龍', sub: '(Hot) Osmanthus Oolong Tea', price: 150 },
       { id: 'yuzu-oolong-tea', label: '柚子烏龍', sub: 'Yuzu Oolong Tea', price: 100 },
       { id: 'peach-oolong-tea', label: '蜜桃烏龍', sub: 'Peach Oolong Tea', price: 100 },
