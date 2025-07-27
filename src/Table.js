@@ -184,7 +184,7 @@ export default function Table() {
         ];
         csv += headers.join(',') + '\n';
 
-        const txnCols = 8;
+        const txnCols = headers.length - 2; // = 7
 
         report.forEach(r => {
             r.items.forEach((i, idx) => {
@@ -205,10 +205,7 @@ export default function Table() {
                     for (let j = 0; j < txnCols; j++) row.push('');
                 }
                 // then always emit the item columns
-                row.push(
-                    `"${i.name.replace(/"/g, '""')}"`,
-                    i.qty
-                );
+                row.push(`"${i.name}"`, i.qty);
                 csv += row.join(',') + '\n';
             });
         });
