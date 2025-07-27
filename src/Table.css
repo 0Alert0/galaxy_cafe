@@ -354,5 +354,16 @@
 
 }
 
+/* 支出 button style (optional) */
+.expense-button {
+  background: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
+}
+.expense-button:hover {
+  background: #f5c6cb;
+}
+
+
 
 

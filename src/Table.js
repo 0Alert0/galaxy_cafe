@@ -23,6 +23,9 @@ export default function Table() {
     const [modalUser, setModalUser] = useState('');
     const [modalPass, setModalPass] = useState('');
     const [modalError, setModalError] = useState('');
+    const [expenseModalVisible, setExpenseModalVisible] = useState(false);
+    const [expenseItemName, setExpenseItemName] = useState('');
+    const [expenseAmount, setExpenseAmount] = useState('');
 
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
@@ -144,6 +147,13 @@ export default function Table() {
             else if (r.method === 'LinePay') lineSum += r.total;
         });
 
+        let expenseSum = 0;
+        report.forEach(r => {
+            if (r.total < 0) {
+                expenseSum += -r.total;    // make it positive
+            }
+        });
+
         // —————————————————————
         // 2) start building CSV
         const BOM = "\uFEFF"; // Excel-friendly UTF-8 BOM
@@ -157,7 +167,8 @@ export default function Table() {
             csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
         });
         csv += `\n現金總額,${cashSum}\n`;
-        csv += `LinePay總額,${lineSum}\n\n`;
+        csv += `LinePay總額,${lineSum}\n`;
+        csv += `今日支出,${expenseSum}\n\n`;
 
         // 2b) then output the raw transaction rows
         const headers = [
@@ -234,6 +245,43 @@ export default function Table() {
         setModalPass('');
         setModalVisible(true);
     };
+
+    const openExpenseModal = () => {
+        setExpenseItemName('');
+        setExpenseAmount('');
+        setExpenseModalVisible(true);
+    };
+    const handleConfirmExpense = () => {
+        const cost = Number(expenseAmount);
+        if (!expenseItemName.trim() || isNaN(cost) || cost <= 0) {
+            return alert('請輸入正確的項目名稱與金額');
+        }
+
+        // build a negative‐total record
+        const now = (() => {
+            const d = new Date();
+            const pad2 = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
+                `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+        })();
+
+        const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        dailyReport.push({
+            timestamp: now,
+            tableId: '',
+            guests: '',
+            items: [{ id: '', name: expenseItemName, qty: 1 }],
+            total: -cost,
+            method: 'Expense',
+            cardNumber: '',
+            discount: 0,
+            customAmount: 0
+        });
+        localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
+        setExpenseModalVisible(false);
+        alert(`已記錄支出：${expenseItemName} –${cost}`);
+    };
+
 
     return (
         <div className="table">
@@ -334,7 +382,15 @@ export default function Table() {
                     </button>
                 </form>
 
-                
+                <button
+                    className="expense-button"
+                    onClick={openExpenseModal}
+                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
+                >
+                    支出
+                </button>
+
+
                 <button
                     className="show-summary-button"
                     onClick={showDailySummary}
@@ -364,6 +420,29 @@ export default function Table() {
                     Clear All Storage
                 </button>*/}
             </aside>
+            {expenseModalVisible && (
+                <div className="modal-overlay">
+                    <div className="login-modal">
+                        <h2>記錄支出</h2>
+                        <input
+                            type="text"
+                            placeholder="項目名稱"
+                            value={expenseItemName}
+                            onChange={e => setExpenseItemName(e.target.value)}
+                        />
+                        <input
+                            type="number"
+                            placeholder="金額"
+                            value={expenseAmount}
+                            onChange={e => setExpenseAmount(e.target.value)}
+                        />
+                        <div className="modal-actions">
+                            <button onClick={() => setExpenseModalVisible(false)}>取消</button>
+                            <button onClick={handleConfirmExpense}>確認</button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {modalVisible && (
                 <div className="modal-overlay">
                     <div className="login-modal">
