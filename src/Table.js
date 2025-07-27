@@ -163,7 +163,6 @@ export default function Table() {
         const headers = [
             'timestamp',
             'tableId',
-            'guests',
             'total',
             'method',
             'cardNumber',
@@ -184,7 +183,6 @@ export default function Table() {
                     row.push(
                         `"${r.timestamp.replace(/"/g, '""')}"`,
                         `"${r.tableId}"`,
-                        `"${r.guests}"`,
                         r.total,
                         `"${r.method}"`,
                         `"${(r.cardNumber || '').replace(/"/g, '""')}"`,

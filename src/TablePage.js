@@ -6,7 +6,7 @@ import './TablePage.css';
 export default function TablePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [guests, setGuests] = useState('1');
+  
 
   // load persisted cart (or empty)
   const [cart, setCart] = useState(() => {
@@ -190,7 +190,7 @@ export default function TablePage() {
       return;
     }
 
-    const newOrder = { tableId: id, guests, items: cart, total };
+    const newOrder = { tableId: id, items: cart, total };
     if (id === 'Take Out') {
       const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
       takeouts.push(newOrder);
@@ -205,7 +205,7 @@ export default function TablePage() {
     }
     localStorage.removeItem('cart');
     setCart([]);
-  }, [cart, guests, id, navigate, total]);
+  }, [cart, id, navigate, total]);
 
 
   const goBack = useCallback(() => {
@@ -256,17 +256,6 @@ export default function TablePage() {
       <aside className="cart">
         <div className="table-header">
           <div className="table-label">{id}</div>
-          <div className="party-size">
-            <label>
-              人數:
-              <input
-                type="number"
-                min="1"
-                value={guests}
-                onChange={e => setGuests(e.target.value)}
-              />
-            </label>
-          </div>
         </div>
 
         <h3>物品清單</h3>

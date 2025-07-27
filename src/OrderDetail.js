@@ -50,7 +50,7 @@ export default function OrderDetail() {
     if (!order) return null;
 
     // ─── Destructure & compute ─────────────────────────────────────
-    const { tableId, guests, items, total } = order;
+    const { tableId, items, total } = order;
     const discountNum = Number(discount) || 0;
     const discountedTotal = Math.max(0, total - discountNum);
     const customNum = Number(customAmount);
@@ -66,7 +66,6 @@ export default function OrderDetail() {
         const salesLog = JSON.parse(localStorage.getItem('salesLog') || '[]');
         salesLog.push({
             tableId,
-            guests,
             items,
             total: finalTotal,
             discount: discountNum,
@@ -85,8 +84,7 @@ export default function OrderDetail() {
             `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         dailyReport.push({
             timestamp: now,
-            tableId,
-            guests,                    // ISO string timestamp
+            tableId,                    // ISO string timestamp
             items: items.map(i => ({          // copy id/name/qty
                 id: i.id,
                 name: i.name,
@@ -105,7 +103,6 @@ export default function OrderDetail() {
         monthly.push({
             timestamp: now,
             tableId,
-            guests,
             items: items.map(i => ({ id: i.id, name: i.name, qty: i.qty })),
             total: finalTotal,
             method,
@@ -156,7 +153,7 @@ export default function OrderDetail() {
         <div className="order-detail">
             <header className="od-header">
                 <h1>桌號: {tableId}</h1>
-                <p>人數: {guests}</p>
+                
             </header>
 
             <header className="od-header">
