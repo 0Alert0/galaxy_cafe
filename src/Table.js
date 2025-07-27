@@ -262,19 +262,27 @@ export default function Table() {
                 `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
         })();
 
-        const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-        dailyReport.push({
+        const entry = {
             timestamp: now,
-            tableId: '',
-            guests: '',
+            tableId: '',           // no table           // no guests
             items: [{ id: '', name: expenseItemName, qty: 1 }],
-            total: -cost,
+            total: -cost,          // negative amount
             method: 'Expense',
             cardNumber: '',
             discount: 0,
             customAmount: 0
-        });
-        localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
+        };
+
+        // — push into dailyreport —
+        const daily = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        daily.push(entry);
+        localStorage.setItem('dailyreport', JSON.stringify(daily));
+
+        // — push into monthlyReport —
+        const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+        monthly.push(entry);
+        localStorage.setItem('monthlyReport', JSON.stringify(monthly));
+
         setExpenseModalVisible(false);
         alert(`已記錄支出：${expenseItemName} –${cost}`);
     };
