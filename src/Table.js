@@ -219,6 +219,19 @@ export default function Table() {
         a.download = `${new Date().toISOString().slice(0, 10)}.csv`;
         a.click();
         URL.revokeObjectURL(url);
+
+        fetch('https://script.google.com/macros/s/AKfycbyXGAQL3l4SylA5AHgk9oxZM2pUJRifm4Wvyb03mn-j1G_HKBts-bLEbLIRPqw39-kj/exec', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/csv;charset=utf-8' },
+            body: csv
+        })
+            .then(r => r.json())
+            .then(res => res.success
+                ? alert('成功推送到 Google Sheet！')
+                : alert('推送失敗：' + res.error)
+            )
+            .catch(err => alert('網路錯誤：' + err.message));
+
         setModalVisible(false);
         const monthly = localStorage.getItem('monthlyReport');
 
