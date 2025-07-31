@@ -1,5 +1,5 @@
 // src/components/Report.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart,
@@ -46,6 +46,59 @@ export default function Reports() {
     setMonthlyExpense(expense);
   }, []);
 
+  const exportMonthlyReportCSV = useCallback(() => {
+    // pull in your full month’s array
+    const report = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+    if (!report.length) {
+      return alert('本月報表為空，無法下載。');
+    }
+
+    // 1) aggregate per-item qty
+    const itemTotals = {};
+    report.forEach(entry => {
+      entry.items.forEach(i => {
+        itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
+      });
+    });
+
+    // 2) compute payment sums
+    let cashSum = 0, lineSum = 0, expenseSum = 0;
+    report.forEach(entry => {
+      if (entry.method === 'Cash') cashSum += entry.total;
+      else if (entry.method === 'LinePay') lineSum += entry.total;
+      else if (entry.method === 'Expense') expenseSum += Math.abs(entry.total);
+    });
+
+    // 3) build CSV
+    const BOM = '\uFEFF';
+    let csv = BOM;
+
+    // header
+    csv += '項目,總數量\n';
+    // item lines
+    Object.entries(itemTotals).forEach(([name, qty]) => {
+      csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
+    });
+
+    // summary lines
+    csv += `\n現金總額,${cashSum}\n`;
+    csv += `LinePay總額,${lineSum}\n`;
+    csv += `月支出,${expenseSum}\n`;
+
+    // 4) download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `monthlyreport_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    localStorage.clear();
+    sessionStorage.clear();
+  }, []);
+
+
   return (
     <div className="reports-container">
       <h1>Monthly Summary</h1>
@@ -59,6 +112,11 @@ export default function Reports() {
         <div>
           <h2>Total Expense</h2>
           <p className="expense-amount">-${monthlyExpense}</p>
+        </div>
+        <div>
+          <button className="download-csv" onClick={exportMonthlyReportCSV}>
+            Download CSV
+          </button>
         </div>
       </div>
 
