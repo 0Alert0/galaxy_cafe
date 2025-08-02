@@ -31,11 +31,11 @@ export default function Table() {
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
         // compute today's sales total
-        const log = JSON.parse(localStorage.getItem('salesLog') ?? '[]');
-        const today = new Date().toDateString();
-        const sum = log
-            .filter(s => new Date(s.timestamp).toDateString() === today)
-            .reduce((a, s) => a + (s.total ?? 0), 0);
+       
+        const report = JSON.parse(localStorage.getItem('dailyreport') ?? '[]');
+        const sum = report
+            .filter(r => r.method === 'Cash' || r.method === 'LinePay')
+            .reduce((acc, r) => acc + (r.total ?? 0), 0);
         setDailyTotal(sum);
 
         // fetch public IP
@@ -216,11 +216,14 @@ export default function Table() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${new Date().toISOString().slice(0, 10)}.csv`;
+        const firstOrderDate = report.length > 0
+            ? report[0].timestamp.split(' ')[0]
+            : new Date().toISOString().slice(0, 10);
+        a.download = `${firstOrderDate}.csv`;
         a.click();
         URL.revokeObjectURL(url);
 
-        
+
         setModalVisible(false);
         const monthly = localStorage.getItem('monthlyReport');
 

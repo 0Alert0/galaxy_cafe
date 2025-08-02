@@ -62,19 +62,6 @@ export default function OrderDetail() {
     }
 
     function handleConfirmPayment() {
-        // 1) Log the sale
-        const salesLog = JSON.parse(localStorage.getItem('salesLog') || '[]');
-        salesLog.push({
-            tableId,
-            items,
-            total: finalTotal,
-            discount: discountNum,
-            customAmount: customNum,
-            cardNumber,
-            method,
-            timestamp: new Date().toISOString()
-        });
-        localStorage.setItem('salesLog', JSON.stringify(salesLog));
 
         const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         const d = new Date();
@@ -153,7 +140,7 @@ export default function OrderDetail() {
         <div className="order-detail">
             <header className="od-header">
                 <h1>桌號: {tableId}</h1>
-                
+
             </header>
 
             <header className="od-header">
