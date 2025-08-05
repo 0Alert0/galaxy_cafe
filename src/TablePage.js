@@ -6,7 +6,7 @@ import './TablePage.css';
 export default function TablePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
 
   // load persisted cart (or empty)
   const [cart, setCart] = useState(() => {
@@ -73,16 +73,17 @@ export default function TablePage() {
 
   // your categories & menu data
   const categories = [
-    'Coffee',
-    'Tea / Juice / Non-Caffeine',
-    'Cocktails',
-    'Beers',
-    'Brunch / Toast',
-    'Dessert / Fried Food',
-    'Royalty Card'
+    '咖啡',
+    '茶 / 果汁 / 無咖啡因飲品',
+    '調酒',
+    '啤酒',
+    '早午餐 / 吐司',
+    '點心 / 炸物',
+    '寄杯卡',
+    '活動'
   ];
   const itemsByCategory = {
-    Coffee: [
+    咖啡: [
       { id: 'coldbrewcoffee', label: '冰滴咖啡', sub: 'Cold brew coffee (每日限量 Limited)', price: 150 },
       { id: 'americano', label: '美式咖啡', sub: 'Americano', price: 80 },
       { id: 'espresso', label: '義式咖啡', sub: 'Espresso', price: 80 },
@@ -98,7 +99,7 @@ export default function TablePage() {
       { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 }
 
     ],
-    'Tea / Juice / Non-Caffeine': [
+    '茶 / 果汁 / 無咖啡因飲品': [
       { id: 'iced-green-tea', label: '(冰) 綠茶', sub: '(Iced) Green Tea', price: 80 },
       { id: 'iced-black-tea', label: '(冰) 紅茶', sub: '(Iced) Black Tea', price: 80 },
       { id: 'iced-oolong-tea', label: '(冰) 烏龍茶', sub: '(Iced) Oolong Tea', price: 80 },
@@ -119,7 +120,7 @@ export default function TablePage() {
       { id: 'flavored-sparkling-water', label: '風味氣泡飲', sub: 'Flavored Sparkling Water', price: 100 },
       { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 }
     ],
-    Cocktails: [
+    調酒: [
       { id: 'white-russian', label: '白俄羅斯', sub: 'White Russian', price: 350 },
       { id: 'yogurt-bubble', label: '優格泡泡', sub: 'Yogurt Bubble', price: 350 },
       { id: 'lemon-cocktail', label: '溫柔鄉', sub: 'Lemon Cocktail', price: 350 },
@@ -139,7 +140,7 @@ export default function TablePage() {
       { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
       { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true }
     ],
-    Beers: [
+    啤酒: [
       { id: 'budweiser', label: '百威', sub: 'Budweiser', price: 100 },
       { id: 'san-miguel', label: '生力', sub: 'San Miguel', price: 130 },
       { id: 'corona', label: '可樂娜', sub: 'Corona', price: 150 },
@@ -148,7 +149,7 @@ export default function TablePage() {
       { id: 'white-beer', label: '白帥帥', sub: 'White Beer', price: 250 },
       { id: 'black-beer', label: '黑嚕嚕', sub: 'Black Beer', price: 250 }
     ],
-    'Brunch / Toast': [
+    '早午餐 / 吐司': [
       { id: 'galaxy-brunch', label: '星翼早午餐', sub: 'Galaxy Brunch', price: 250 },
       { id: 'galaxy-pizza', label: '星翼披薩', sub: 'Galaxy Pizza', price: 150 },
       { id: 'hot-pressed-sandwich', label: '熱壓吐司 (2份)', sub: 'Hot Pressed Sandwich (2 servings)', price: 150 },
@@ -161,7 +162,7 @@ export default function TablePage() {
       { id: 'two-flavors-thick-slice', label: '雙拼厚片', sub: '2 Flavors', price: 100 }
 
     ],
-    'Dessert / Fried Food': [
+    '點心 / 炸物': [
       { id: 'brownie-cake', label: '布朗尼蛋糕', sub: 'Brownie Cake', price: 130 },
       { id: 'basque-cheesecake', label: '巴斯克乳酪蛋糕', sub: 'Basque Cheesecake', price: 130 },
       { id: 'crepe-cake', label: '千層蛋糕', sub: 'Crepe Cake', price: 130 },
@@ -171,13 +172,33 @@ export default function TablePage() {
       { id: 'hash-browns', label: '薯餅 (2塊)', sub: 'Hash Browns (2 pcs)', price: 70 },
       { id: 'french-fries', label: '薯條', sub: 'French Fries', price: 120 }
     ],
-    'Royalty Card': [
+    '寄杯卡': [
       { id: '800', label: '寄杯卡 800', sub: '', price: 800 },
       { id: '1200', label: '寄杯卡 1200', sub: '', price: 1200 },
       { id: '1400', label: '寄杯卡 1400', sub: '', price: 1400 },
       { id: '1500', label: '寄杯卡 1500', sub: '', price: 1500 },
 
+    ],
+    活動: [
+      { id: '399', label: '$399', sub: '', price: 399 },
+      { id: '499', label: '$499', sub: '', price: 499 },
+      { id: '599', label: '$599', sub: '', price: 599 },
+      { id: '699', label: '$699', sub: '', price: 699 },
+      { id: '799', label: '$799', sub: '', price: 799 },
+      { id: '899', label: '$899', sub: '', price: 899 },
+      { id: '999', label: '$999', sub: '', price: 999 },
+      { id: '1099', label: '$1099', sub: '', price: 1099 },
+      { id: '1199', label: '$1199', sub: '', price: 1199 },
+      { id: '1299', label: '$1299', sub: '', price: 1299 },
+      { id: '1399', label: '$1399', sub: '', price: 1399 },
+      { id: '1499', label: '$1499', sub: '', price: 1499 },
+      { id: '1599', label: '$1599', sub: '', price: 1599 },
+      { id: '1699', label: '$1699', sub: '', price: 1699 },
+      { id: '1799', label: '$1799', sub: '', price: 1799 },
+      { id: '1899', label: '$1899', sub: '', price: 1899 },
+      { id: '1999', label: '$1999', sub: '', price: 1999 }
     ]
+
   };
   const [selectedCat, setSelectedCat] = useState(categories[0]);
   const menuItems = itemsByCategory[selectedCat] ?? [];
