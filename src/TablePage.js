@@ -180,6 +180,7 @@ export default function TablePage() {
 
     ],
     活動: [
+      { id: '自訂', label: '自訂金額', sub: '', price: '' },
       { id: '399', label: '$399', sub: '', price: 399 },
       { id: '499', label: '$499', sub: '', price: 499 },
       { id: '599', label: '$599', sub: '', price: 599 },
