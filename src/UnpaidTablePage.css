@@ -1,18 +1,17 @@
 :root {
-  --bg-light: #f5f7fa;
-  --panel-bg: rgba(255, 255, 255, 0.85);
-  --modal-bg: rgba(255, 255, 255, 0.9);
-  --border-light: rgba(200, 200, 200, 0.5);
-  --shadow-sm: rgba(0, 0, 0, 0.1);
-  --shadow-lg: rgba(0, 0, 0, 0.2);
-  --accent: #28a745;
-  --warn: #e74c3c;
+  --bg-light: #f5f7fb;
+  --panel-bg: rgba(255, 255, 255, 0.94);
+  --modal-bg: rgba(255, 255, 255, 0.98);
+  --border-light: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px rgba(18, 21, 26, 0.06), 0 2px 8px rgba(18, 21, 26, 0.05);
+  --shadow-lg: 0 10px 28px rgba(18, 21, 26, 0.12);
+  --accent: #2faf6d;
+  --warn: #e16357;
   --text-dark: #333;
-  --text-muted: #666;
+  --text-muted: #6b7280;
 }
 
-/* -------- Page & Layout -------- */
-/* ===== Container ===== */
+/* Page & grid (unchanged sizes) */
 .unpaid-page {
   max-width: 800px;
   margin: 2rem auto;
@@ -22,7 +21,6 @@
   background: var(--bg-light);
 }
 
-/* ===== Grid of Orders ===== */
 .orders-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -30,21 +28,20 @@
   margin-bottom: 2rem;
 }
 
-/* ===== Order Card ===== */
+/* Card */
 .order-card {
   position: relative;
   background: var(--panel-bg);
   border-left: 6px solid var(--accent);
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 1.5rem 1rem;
   text-align: left;
-  box-shadow: 0 2px 6px var(--shadow-sm);
-  transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: var(--shadow-sm);
 }
 
 .order-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 4px 12px var(--shadow-lg);
+  box-shadow: var(--shadow-lg);
 }
 
 .order-card h2 {
@@ -59,7 +56,7 @@
   color: var(--text-muted);
 }
 
-/* ===== Info Button ===== */
+/* Info button */
 .info-btn {
   position: absolute;
   top: 1rem;
@@ -67,99 +64,93 @@
   width: 1.4rem;
   height: 1.4rem;
   border: none;
-  border-radius: 75%;
+  border-radius: 999px;
   background: var(--text-muted);
   color: #fff;
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
-
 }
 
-
-/* ===== Action Buttons ===== */
+/* Buttons */
 .order-card button,
 .back-btn {
-  border: 2px solid transparent;
+  border: 1px solid var(--border-light);
   padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: bold;
-  transition: background 0.2s, border-color 0.2s;
+  font-weight: 700;
 }
 
 .view-btn {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
+  background: #eaf7ef;
+  color: #145c35;
+  border-color: #cfe8db;
 }
 
+.view-btn:hover {
+  background: #dff3e7;
+}
 
 .modify-btn {
-  background: var(--text-muted);
-  color: #fff;
-  border-color: var(--text-muted);
+  background: #eef2f7;
+  color: #1f2937;
+  border-color: #dbe2ed;
   margin-left: 0.5rem;
+}
+
+.modify-btn:hover {
+  background: #e6edf7;
 }
 
 .split-btn {
-  background: var(--warn);
-  color: #fff;
-  border-color: var(--warn);
+  background: #fff0ef;
+  color: #7a2c26;
+  border-color: #ffd5d1;
   margin-left: 0.5rem;
 }
 
+.split-btn:hover {
+  background: #ffe7e5;
+}
 
-
-/* ===== “No orders” Text ===== */
+/* Empty text */
 .none {
   color: var(--text-muted);
   font-style: italic;
   margin-bottom: 2rem;
 }
 
-/* ===== Back Button ===== */
+/* Back */
 .back-btn {
-  background: transparent;
+  background: #ffffff;
   color: var(--text-dark);
-  border: 2px solid var(--accent);
+  border: 1px solid #dbe2ed;
   padding: 0.75rem 1.5rem;
 }
 
 .back-btn:hover {
-  background: var(--accent);
-  color: #fff;
+  background: #f6faff;
 }
 
-/* ===== Modal Overlay ===== */
+/* Modal */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
+  inset: 0;
+  background: rgba(17, 24, 39, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
 
-/* ===== Modal Window ===== */
 .modal {
   background: var(--modal-bg);
   padding: 2rem;
-  border-radius: 12px;
+  border-radius: 14px;
   width: 90%;
-  max-width: 380px;
-  box-shadow: 0 4px 12px var(--shadow-sm);
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.modal:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px var(--shadow-lg);
+  max-width: 420px;
+  box-shadow: var(--shadow-lg);
 }
 
 .split-list {
@@ -177,18 +168,13 @@
 }
 
 .split-list input {
-  width: 3rem;
+  width: 3.25rem;
   padding: 0.3rem;
   border: 1px solid var(--border-light);
-  border-radius: 4px;
-  transition: border-color 0.2s;
+  border-radius: 8px;
+  background: #fbfcfe;
 }
 
-.split-list input:focus {
-  border-color: var(--accent);
-}
-
-/* ===== Modal Actions ===== */
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -197,51 +183,19 @@
 
 .modal-actions button {
   padding: 0.5rem 1rem;
-  border: 2px solid var(--accent);
-  background: transparent;
+  border: 1px solid #cfe8db;
+  background: #ffffff;
   color: var(--text-dark);
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
 }
 
 .modal-actions button:hover {
-  background: var(--accent);
-  color: #fff;
+  background: #eaf7ef;
 }
 
-/* wrap the input + buttons */
 .split-qty-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-/* style those tiny +/- buttons */
-.split-qty-group .split-btn {
-  width: 2rem;
-  height: 2rem;
-  line-height: 1;
-  border: 1px solid #ccc;
-  background: #f0f0f0;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.1s;
-  color: #000;
-}
-
-.split-qty-group .split-btn:hover:not(:disabled) {
-  background: #e0e0e0;
-}
-
-.split-qty-group .split-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* keep the input nice and centered */
-.split-qty-group input {
-  width: 3rem;
-  text-align: center;
 }

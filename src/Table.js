@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Table.css';
+import MikoLogo from './Miko.PNG';
+
 
 const VALID_USER = 'admin';
 const VALID_PASS = '1234';
@@ -31,7 +33,7 @@ export default function Table() {
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
         // compute today's sales total
-       
+
         const report = JSON.parse(localStorage.getItem('dailyreport') ?? '[]');
         const sum = report
             .filter(r => r.method === 'Cash' || r.method === 'LinePay')
@@ -326,6 +328,7 @@ export default function Table() {
 
                 <div className="container3">
                     <div className="a-bottom-group">
+                        {renderBtn('A7', 'shape vrectangle light')}
                         {renderBtn('A5', 'shape vrectangle light')}
                         {renderBtn('A6', 'shape circle light')}
                         {renderBtn('A4', 'shape vrectangle light')}
@@ -422,6 +425,12 @@ export default function Table() {
                 >
                     月報
                 </button>
+                <img
+                    src={MikoLogo}
+                    alt="Miko Logo"
+                    className="miko-logo"
+                />
+
                 {/*<button
                     className="clear-storage-button"
                     onClick={clearAll}

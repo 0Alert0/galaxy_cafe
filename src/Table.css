@@ -95,7 +95,12 @@
 }
 
 .a-bottom-group>button:nth-child(2) {
-  margin-right: 3.5rem;
+  margin-right: 1rem;
+  margin-top: 2.7rem;
+}
+
+.a-bottom-group>button:nth-child(2) {
+  margin-right: 2.5rem;
 }
 
 /* ─ B-TOP-GROUP (B4–B1) ───────────────────────────────────────────────── */
@@ -364,6 +369,14 @@
   background: #f5c6cb;
 }
 
+
+
+.miko-logo {
+  margin-top: 5rem; /* space below button */
+  max-width: 200px;   /* adjust as needed */
+  height: auto;
+  align-self: center;
+}
 
 
 

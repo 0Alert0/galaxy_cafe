@@ -1,107 +1,101 @@
+:root {
+  --shadow-in: inset 4px 4px 8px rgba(18, 21, 26, .15), inset -4px -4px 8px rgba(255, 255, 255, .8);
+  --shadow-out: 8px 8px 16px rgba(18, 21, 26, .15), -8px -8px 16px rgba(255, 255, 255, .4);
+  --panel-bg: rgba(255, 255, 255, 0.92);
+  --panel-border: rgba(0, 0, 0, 0.08);
+  --accent: #2faf6d;
+  --text: #2b2b2b;
+  --text-muted: #6b7280;
+}
+
+/* Container (size unchanged) */
 .order-detail {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem;
-  background: var(--bg);
-  border-radius: 20px;
-  box-shadow: 
-    8px 8px 16px var(--shadow-dark),
-   -8px -8px 16px var(--shadow-light);
-  font-family: 'Helvetica Neue', sans-serif;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  box-shadow: var(--shadow-out);
   color: var(--text);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Headers */
 .od-header {
   text-align: center;
   margin-bottom: 2rem;
 }
+
 .od-header h1 {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
 }
 
-/* Payment Methods (pill group) */
+/* Payment method pills */
 .od-methods {
   display: inline-flex;
-  background: var(--panel);
-  border-radius: 50px;
-  box-shadow:
-    inset 4px 4px 8px var(--shadow-dark),
-    inset -4px -4px 8px var(--shadow-light);
-  margin-bottom: 2rem;
- 
+  background: #f2f6f9;
+  border-radius: 999px;
+  padding: 6px;
+  box-shadow: var(--shadow-in);
+  gap: 6px;
 }
+
 .od-methods button {
-  flex: 1;
-  padding: 0.75rem 1.5rem;
+  padding: 0.6rem 1.2rem;
   background: transparent;
-  border: none;
-  border-radius: 50px;
+  border: 1px solid transparent;
+  border-radius: 999px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  /* unchanged */
   color: var(--text-muted);
-  transition: 
-    color 0.2s,
-    background 0.2s;
 }
+
 .od-methods button.selected {
   background: var(--accent);
   color: #fff;
-  box-shadow:
-    4px 4px 8px var(--shadow-dark),
-   -4px -4px 8px var(--shadow-light);
-}
-.od-methods button.selected .en {
-  color: rgba(255,255,255,0.8);
-}
-.od-methods .en {
-  display: block;
-  font-weight: 400;
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
+  border-color: var(--accent);
+  box-shadow: 0 8px 20px rgba(47, 175, 109, 0.25);
 }
 
-/* Items List */
+/* Items list */
 .od-items {
   margin-bottom: 2rem;
 }
+
 .items-title {
   color: var(--accent);
   margin-bottom: 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;
 }
+
 .od-items ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
+
 .od-items li {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
-  background: var(--panel);
+  margin-bottom: 0.6rem;
+  background: #fbfcfe;
+  border: 1px solid var(--panel-border);
   border-radius: 12px;
-  box-shadow:
-    4px 4px 8px var(--shadow-dark),
-   -4px -4px 8px var(--shadow-light);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(18, 21, 26, 0.06);
 }
-.od-items li:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    6px 6px 12px var(--shadow-dark),
-   -6px -6px 12px var(--shadow-light);
-}
+
 .od-items .name {
   font-weight: 500;
   color: var(--text);
 }
+
 .od-items .qty,
 .od-items .price {
   color: var(--accent);
@@ -111,41 +105,39 @@
 /* Summary */
 .od-summary {
   margin-bottom: 2rem;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   line-height: 1.6;
 }
-.od-summary > div {
+
+.od-summary>div {
   display: flex;
   justify-content: space-between;
   margin-bottom: 0.5rem;
-  font-size: 1.5rem;
 }
+
 .od-summary input {
   width: 6rem;
   padding: 0.5rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--panel);
-  box-shadow:
-    inset 4px 4px 8px var(--shadow-dark),
-    inset -4px -4px 8px var(--shadow-light);
-  transition: box-shadow 0.2s;
-  font-size: 1.5rem;
-  
-}
-.od-summary input:focus {
-  outline: none;
-  box-shadow:
-    inset 2px 2px 4px var(--shadow-dark),
-    inset -2px -2px 4px var(--shadow-light);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: #fbfcfe;
+  box-shadow: var(--shadow-in);
+  font-size: 1rem;
 }
 
-/* Footer Buttons */
+.discount-input,
+.custom-input,
+.card-input {
+  margin-top: 1rem;
+}
+
+/* Footer */
 .od-footer {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
 }
+
 .od-footer button {
   flex: 1;
   padding: 0.75rem 1.5rem;
@@ -154,40 +146,28 @@
   font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
-  transition: 
-    transform 0.2s, 
-    box-shadow 0.2s,
-    background 0.2s;
 }
+
 .od-footer .back {
-  background: var(--panel);
+  background: #ffffff;
   color: var(--text);
-  box-shadow:
-    4px 4px 8px var(--shadow-dark),
-   -4px -4px 8px var(--shadow-light);
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 1px 2px rgba(18, 21, 26, 0.06);
 }
+
 .od-footer .back:hover {
   transform: translateY(-2px);
-  box-shadow:
-    6px 6px 12px var(--shadow-dark),
-   -6px -6px 12px var(--shadow-light);
+  box-shadow: 0 10px 20px rgba(18, 21, 26, 0.12);
 }
+
 .od-footer .confirm {
   background: var(--accent);
   color: #fff;
-  box-shadow:
-    4px 4px 8px var(--shadow-dark),
-   -4px -4px 8px var(--shadow-light);
-}
-.od-footer .confirm:hover {
-  transform: translateY(-2px);
-  background: #e55353;
+  border: 1px solid var(--accent);
+  box-shadow: 0 10px 20px rgba(47, 175, 109, 0.18);
 }
 
-/* Spacing Inputs */
-.discount-input,
-.custom-input,
-.card-input {
-  margin-top: 1rem;
-  font-size: 1.5rem;
+.od-footer .confirm:hover {
+  filter: brightness(1.03);
+  transform: translateY(-2px);
 }
