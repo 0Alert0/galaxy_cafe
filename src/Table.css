@@ -363,64 +363,53 @@
   align-self: center;
 }
 
-/* ─── Left reservation list — only renders when there are bookings today ─── */
 .left-rsv {
-  width: 180px;
-  min-width: 180px;
-  flex: 0 0 180px;
-  padding: 0.75rem;
+  width: 300px;              /* wider */
+  min-width: 300px;          /* match width */
+  padding: 1rem 1.25rem;     /* more breathing space */
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px var(--shadow-light);
+  border-radius: 12px;       /* slightly rounder */
+  box-shadow: 0 6px 14px var(--shadow-light); /* deeper shadow */
   align-self: flex-start;
 }
 
 .left-rsv h4 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
   font-weight: bold;
-}
-
-.left-rsv ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  font-size: 1.2rem;         /* bigger title */
 }
 
 .left-rsv li {
-  padding: 0.45rem 0.55rem;
+  padding: 0.6rem 0.75rem;   /* larger clickable space */
   background: #fff;
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
+  border-radius: 8px;
+  font-size: 1rem;           /* bigger text for table/time */
 }
 
-/* row with time + table ID — now spaced using a tiny grid */
+/* row with time + table ID side-by-side */
 .rsv-main {
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  /* fixed time column for spacing */
+  display: flex;              /* change from grid to flex */
   align-items: center;
-  column-gap: 0.5rem;
+  gap: 1rem;                 /* space between time and table ID */
 }
 
-/* time: monospaced digits so times line up neatly */
 .left-rsv .time {
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
+  font-size: 2rem;
 }
 
-/* table ID a bit bolder, with left padding for clarity */
 .left-rsv .table {
   font-weight: bold;
+  font-size: 2rem;
+  display: inline;             /* inline so it stays beside time */
 }
 
-/* notes line (optional, shown only if present) */
 .rsv-notes {
-  font-size: 0.8rem;
-  color: #666;
-  margin-top: 0.25rem;
+  font-size: 0.9rem;         /* bigger notes */
+  color: #555;
+  margin-top: 0.5rem;
   word-break: break-word;
 }
