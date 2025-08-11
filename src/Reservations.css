@@ -1,0 +1,189 @@
+/* Reservations.css — matches your current visual scale */
+.rsv-page {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background: var(--panel-bg);
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow-light);
+}
+
+.rsv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.rsv-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.rsv-controls input,
+.rsv-controls button {
+    padding: 0.5rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.rsv-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.rsv-card {
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-left: 6px solid var(--accent);
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 6px var(--shadow-light);
+}
+
+.rsv-card .row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.rsv-card .sub {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.rsv-card .notes {
+    margin-top: 0.25rem;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.rsv-card .actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.rsv-card .actions button {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+}
+
+.rsv-card .actions button:hover {
+    opacity: 0.9;
+}
+
+.pill {
+    background: #eef2f7;
+    border: 1px solid #dbe2ed;
+    padding: 0.25rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+}
+
+/* Status colors */
+.status-seated {
+    border-left-color: #2563eb;
+}
+
+.status-completed {
+    border-left-color: #22c55e;
+}
+
+.status-no-show,
+.status-cancelled {
+    border-left-color: #ef4444;
+}
+
+.none {
+    color: #666;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+/* Modal */
+.rsv-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.rsv-modal {
+    background: #fff;
+    border: 1px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 90%;
+    max-width: 520px;
+    box-shadow: 0 6px 16px var(--shadow-light);
+}
+
+.rsv-modal .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.rsv-modal .grid input,
+.rsv-modal .grid select {
+    padding: 0.5rem;
+    border: 1px solid var(--panel-border);
+    border-radius: 6px;
+}
+
+.rsv-modal .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.rsv-modal .modal-actions button {
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+}
+
+.rsv-modal .modal-actions button:first-child {
+    background: #ccc;
+    color: #333;
+}
+
+.close-btn {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
+}
+
+.rsv-close { color: #999; }
+.rsv-close:hover { color: #e74c3c; }
+    

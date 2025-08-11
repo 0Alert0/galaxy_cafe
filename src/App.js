@@ -6,21 +6,24 @@ import UnpaidTablePage from './UnpaidTablePage';
 import OrderDetail from './OrderDetail';
 import Takeout from './takeout';
 import Report from './Report';
+import ReservationsPage from './Reservations';
+
 
 
 
 export default function App() {
   return (
-    
-      <Routes>
-        <Route path="/" element={<Table />} />
-        <Route path="/tablePage/:id" element={<TablePage />} />
-        <Route path="/unpaid" element={<UnpaidTablePage />} />
-        <Route path="/orderdetail" element={<OrderDetail />} />
-        <Route path="/orderdetail/:orderIndex" element={<OrderDetail />} />
-        <Route path="/takeout" element={<Takeout/>} />
-        <Route path="/report" element={<Report />} />
-      </Routes>
-    
+
+    <Routes>
+      <Route path="/" element={<Table />} />
+      <Route path="/tablePage/:id" element={<TablePage />} />
+      <Route path="/unpaid" element={<UnpaidTablePage />} />
+      <Route path="/orderdetail" element={<OrderDetail />} />
+      <Route path="/orderdetail/:orderIndex" element={<OrderDetail />} />
+      <Route path="/takeout" element={<Takeout />} />
+      <Route path="/report" element={<Report />} />
+      <Route path="/reservations" element={<ReservationsPage />} />
+    </Routes>
+
   );
 }

@@ -23,7 +23,6 @@
   overflow-y: auto;
   justify-content: center;
   height: 92vh;
-
 }
 
 .container1 {
@@ -51,7 +50,6 @@
   /* initial A5 offset */
   margin-top: calc(30px);
   margin-right: calc(60px);
-
 }
 
 /* ─── C-GROUP (C1–C5) ─────────────────────────────────────────────────── */
@@ -90,11 +88,6 @@
 }
 
 .a-bottom-group>button:first-child {
-  margin-right: 1rem;
-  margin-top: 2.7rem;
-}
-
-.a-bottom-group>button:nth-child(2) {
   margin-right: 1rem;
   margin-top: 2.7rem;
 }
@@ -278,15 +271,13 @@
 .login-modal {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  padding: 2rem;             /* more padding */
+  padding: 2rem;
   border-radius: 8px;
-  width: 80%;                /* take up more of the viewport */
-  max-width: 600px;          /* allow it to grow larger on big screens */
+  width: 80%;
+  max-width: 600px;
   box-shadow: 0 6px 16px var(--shadow-light);
   text-align: center;
-  
 }
-
 
 .login-modal h2 {
   margin-top: 0;
@@ -327,7 +318,6 @@
 
 .modal-actions button:hover {
   background: #248a3f;
-  /* slightly darker accent */
 }
 
 .modal-actions button:first-child {
@@ -341,22 +331,17 @@
 
 /* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
 @media (min-width: 1024px) {
-
-  /* Sidebar */
   .right-sidebar {
     width: 280px;
     height: 940px;
     padding: 1.5rem;
-    
   }
 
-  /* Sidebar buttons */
   .right-sidebar button {
     padding: 1.25rem 1.5rem;
     font-size: 1.25rem;
     line-height: 1.2;
   }
-
 }
 
 /* 支出 button style (optional) */
@@ -365,18 +350,77 @@
   color: #721c24;
   font-weight: bold;
 }
+
 .expense-button:hover {
   background: #f5c6cb;
 }
 
-
-
+/* Logo in sidebar */
 .miko-logo {
-  margin-top: 5rem; /* space below button */
-  max-width: 200px;   /* adjust as needed */
+  margin-top: 5rem;
+  max-width: 200px;
   height: auto;
   align-self: center;
 }
 
+/* ─── Left reservation list — only renders when there are bookings today ─── */
+.left-rsv {
+  width: 180px;
+  min-width: 180px;
+  flex: 0 0 180px;
+  padding: 0.75rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px var(--shadow-light);
+  align-self: flex-start;
+}
 
+.left-rsv h4 {
+  margin: 0 0 0.5rem;
+  font-weight: bold;
+}
 
+.left-rsv ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.left-rsv li {
+  padding: 0.45rem 0.55rem;
+  background: #fff;
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+}
+
+/* row with time + table ID — now spaced using a tiny grid */
+.rsv-main {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  /* fixed time column for spacing */
+  align-items: center;
+  column-gap: 0.5rem;
+}
+
+/* time: monospaced digits so times line up neatly */
+.left-rsv .time {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+/* table ID a bit bolder, with left padding for clarity */
+.left-rsv .table {
+  font-weight: bold;
+}
+
+/* notes line (optional, shown only if present) */
+.rsv-notes {
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 0.25rem;
+  word-break: break-word;
+}

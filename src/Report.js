@@ -73,14 +73,10 @@ export default function Reports() {
     const BOM = '\uFEFF';
     let csv = BOM;
 
-    // header
     csv += '項目,總數量\n';
-    // item lines
     Object.entries(itemTotals).forEach(([name, qty]) => {
       csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
     });
-
-    // summary lines
     csv += `\n現金總額,${cashSum}\n`;
     csv += `LinePay總額,${lineSum}\n`;
     csv += `月支出,${expenseSum}\n`;
@@ -94,9 +90,29 @@ export default function Reports() {
     a.click();
     URL.revokeObjectURL(url);
 
+    // ───────────────────────────────────────────────────────────────
+    // NEW: Preserve future reservations before clearing storage
+    const now = new Date();
+    const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+
+    const futureReservations = reservations.filter(r => {
+      if (!r?.date || !r?.time) return false;
+      // Build a comparable Date from yyyy-mm-dd + HH:mm
+      const t = new Date(`${r.date}T${r.time.length === 5 ? r.time : String(r.time).padStart(5, '0')}:00`);
+      // keep if strictly in the future (and not cancelled)
+      return t.getTime() > now.getTime() && r.status !== 'Cancelled';
+    });
+
+    // clear everything as before
     localStorage.clear();
     sessionStorage.clear();
+
+    // restore only the future reservations
+    if (futureReservations.length) {
+      localStorage.setItem('reservations', JSON.stringify(futureReservations));
+    }
   }, []);
+
 
 
   return (

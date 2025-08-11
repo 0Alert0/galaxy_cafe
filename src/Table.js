@@ -28,6 +28,8 @@ export default function Table() {
     const [expenseModalVisible, setExpenseModalVisible] = useState(false);
     const [expenseItemName, setExpenseItemName] = useState('');
     const [expenseAmount, setExpenseAmount] = useState('');
+    const [todayReservations, setTodayReservations] = useState(0);
+    const [todayRsvs, setTodayRsvs] = useState([]);
 
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
@@ -52,6 +54,29 @@ export default function Table() {
         setUnpaidTables(unpaid);
         const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
         setTakeoutCount(takeouts.length);
+
+        const rsv = JSON.parse(localStorage.getItem('reservations') || '[]');
+        const today = new Date().toISOString().slice(0, 10);
+        const count = rsv.filter(r => r.date === today && r.status === 'Booked').length;
+        setTodayReservations(count);
+
+
+        const load = () => {
+            const all = JSON.parse(localStorage.getItem('reservations') || '[]');
+            const today = new Date().toISOString().slice(0, 10);
+            const list = all
+                .filter(r => r.date === today && r.status === 'Booked')
+                .sort((a, b) => a.time.localeCompare(b.time));
+            setTodayRsvs(list);
+        };
+        load();
+
+        // live update if other pages modify reservations
+        const onStorage = (e) => { if (e.key === 'reservations') load(); };
+        window.addEventListener('storage', onStorage);
+        return () => window.removeEventListener('storage', onStorage);
+
+
     }, []);
 
     // ─── Helpers ──────────────────────────────────────────────────
@@ -297,6 +322,24 @@ export default function Table() {
 
     return (
         <div className="table">
+            {todayRsvs.length > 0 && (
+                <aside className="left-rsv">
+                    <h4>今日訂桌</h4>
+                    <ul>
+                        {todayRsvs.map(r => (
+                            <li key={r.id}>
+                                <div className="rsv-main">
+                                    <span className="time">{r.time}</span>
+                                    <span className="table">{r.tableId || '未指定'}</span>
+                                </div>
+                                {r.notes && r.notes.trim() !== '' && (
+                                    <div className="rsv-notes">{r.notes}</div>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </aside>
+            )}
             <main className="main">
                 <div className="a-top-group">
                     <button
@@ -348,7 +391,10 @@ export default function Table() {
                 <button onClick={goTo('/takeout')}>外帶
                     {takeoutCount > 0 && <span className="badge">{takeoutCount}</span>}
                 </button>
-                {/* <button onClick={() => { }}>Reserved</button> */}
+                <button onClick={goTo('/reservations')}>訂位
+                    {todayReservations > 0 && <span className="badge">{todayReservations}</span>}
+                </button>
+
 
                 <div className="daily-sales">
                     今日總額: ${dailyTotal}
