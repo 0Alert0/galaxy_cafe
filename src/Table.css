@@ -364,8 +364,8 @@
 }
 
 .left-rsv {
-  width: 300px;              /* wider */
-  min-width: 300px;          /* match width */
+  width: 250px;              /* wider */
+  min-width: 250px;          /* match width */
   padding: 1rem 1.25rem;     /* more breathing space */
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -398,12 +398,12 @@
 .left-rsv .time {
   font-variant-numeric: tabular-nums;
   opacity: 0.85;
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
 .left-rsv .table {
   font-weight: bold;
-  font-size: 2rem;
+  font-size: 1.5rem;
   display: inline;             /* inline so it stays beside time */
 }
 
