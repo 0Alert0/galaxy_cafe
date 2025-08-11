@@ -4,10 +4,33 @@ import { useNavigate } from 'react-router-dom';
 import './Table.css';
 import MikoLogo from './Miko.PNG';
 
-
 const VALID_USER = 'admin';
 const VALID_PASS = '1234';
 const ALLOWED_PUBLIC_IP = '119.15.214.56';
+
+// ─── Taiwan time helpers ─────────────────────────────────────────
+function getTaiwanDateYYYYMMDD() {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    const tw = new Date(utcMs + 8 * 60 * 60000); // UTC+8
+    const y = tw.getFullYear();
+    const m = String(tw.getMonth() + 1).padStart(2, '0');
+    const d = String(tw.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+function getTaiwanTimestamp() {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    const tw = new Date(utcMs + 8 * 60 * 60000);
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const y = tw.getFullYear();
+    const m = pad2(tw.getMonth() + 1);
+    const d = pad2(tw.getDate());
+    const h = pad2(tw.getHours());
+    const mi = pad2(tw.getMinutes());
+    const s = pad2(tw.getSeconds());
+    return `${y}-${m}-${d} ${h}:${mi}:${s}`;
+}
 
 export default function Table() {
     const navigate = useNavigate();
@@ -31,11 +54,9 @@ export default function Table() {
     const [todayReservations, setTodayReservations] = useState(0);
     const [todayRsvs, setTodayRsvs] = useState([]);
 
-
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
         // compute today's sales total
-
         const report = JSON.parse(localStorage.getItem('dailyreport') ?? '[]');
         const sum = report
             .filter(r => r.method === 'Cash' || r.method === 'LinePay')
@@ -49,25 +70,29 @@ export default function Table() {
             .catch(() => setPublicIp(null));
 
         // load unpaid table IDs
-        const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]')
-            .map(o => o.tableId);
+        const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]').map(o => o.tableId);
         setUnpaidTables(unpaid);
+
+        // takeouts
         const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
         setTakeoutCount(takeouts.length);
 
+        // reservations (badge)
         const rsv = JSON.parse(localStorage.getItem('reservations') || '[]');
-        const today = new Date().toISOString().slice(0, 10);
+        const today = getTaiwanDateYYYYMMDD();
         const count = rsv.filter(r => r.date === today && r.status === 'Booked').length;
         setTodayReservations(count);
 
-
+        // left list
         const load = () => {
             const all = JSON.parse(localStorage.getItem('reservations') || '[]');
-            const today = new Date().toISOString().slice(0, 10);
+            const t = getTaiwanDateYYYYMMDD();
             const list = all
-                .filter(r => r.date === today && r.status === 'Booked')
+                .filter(r => r.date === t && r.status === 'Booked')
                 .sort((a, b) => a.time.localeCompare(b.time));
             setTodayRsvs(list);
+            // also refresh badge
+            setTodayReservations(list.length);
         };
         load();
 
@@ -75,8 +100,6 @@ export default function Table() {
         const onStorage = (e) => { if (e.key === 'reservations') load(); };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
-
-
     }, []);
 
     // ─── Helpers ──────────────────────────────────────────────────
@@ -97,13 +120,9 @@ export default function Table() {
             return alert('Unable to verify network. Try again shortly.');
         }
         if (publicIp !== ALLOWED_PUBLIC_IP) {
-            return alert(`Clock‑in only allowed from office network (your IP: ${publicIp})`);
+            return alert(`Clock-in only allowed from office network (your IP: ${publicIp})`);
         }
-        const d = new Date();
-        const pad2 = n => String(n).padStart(2, '0');
-        const now =
-            `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
-            `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+        const now = getTaiwanTimestamp();          // <<< Taiwan time
         setClockedInAt(now);
         localStorage.setItem('clockedInAt', now);
     }, [username, password, publicIp]);
@@ -119,7 +138,7 @@ export default function Table() {
         </button>
     );
 
-    // show summary: total qty, total cash & line‑pay
+    // show summary: total qty, total cash & line-pay
     const showDailySummary = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         if (report.length === 0) {
@@ -154,6 +173,7 @@ export default function Table() {
 
         alert(msg);
     }, []);
+
     const exportDailyReportCSV = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         const time = localStorage.getItem('clockedInAt') || '';
@@ -165,28 +185,21 @@ export default function Table() {
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
         report.forEach(r => {
-            // aggregate item qty
             r.items.forEach(i => {
                 itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
             });
-            // aggregate payment totals
             if (r.method === 'Cash') cashSum += r.total;
             else if (r.method === 'LinePay') lineSum += r.total;
         });
 
         let expenseSum = 0;
         report.forEach(r => {
-            if (r.total < 0) {
-                expenseSum += -r.total;    // make it positive
-            }
+            if (r.total < 0) expenseSum += -r.total;
         });
 
-        // —————————————————————
-        // 2) start building CSV
-        const BOM = "\uFEFF"; // Excel-friendly UTF-8 BOM
+        // — build CSV
+        const BOM = "\uFEFF";
         let csv = BOM;
-
-        // 2a) prepend a human‑readable “今日日報” summary block
         csv += '打卡時間\n';
         csv += time + "\n";
         csv += '項目,總數量\n';
@@ -197,27 +210,14 @@ export default function Table() {
         csv += `LinePay總額,${lineSum}\n`;
         csv += `今日支出,${expenseSum}\n\n`;
 
-        // 2b) then output the raw transaction rows
-        const headers = [
-            'timestamp',
-            'tableId',
-            'total',
-            'method',
-            'cardNumber',
-            'discount',
-            'customAmount',
-            'itemName',
-            'qty'
-        ];
+        const headers = ['timestamp', 'tableId', 'total', 'method', 'cardNumber', 'discount', 'customAmount', 'itemName', 'qty'];
         csv += headers.join(',') + '\n';
-
-        const txnCols = headers.length - 2; // = 7
+        const txnCols = headers.length - 2;
 
         report.forEach(r => {
             r.items.forEach((i, idx) => {
                 const row = [];
                 if (idx === 0) {
-                    // first item: emit all txn‑level fields
                     row.push(
                         `"${r.timestamp.replace(/"/g, '""')}"`,
                         `"${r.tableId}"`,
@@ -228,28 +228,24 @@ export default function Table() {
                         r.customAmount ?? ''
                     );
                 } else {
-                    // subsequent items: blank placeholders
                     for (let j = 0; j < txnCols; j++) row.push('');
                 }
-                // then always emit the item columns
                 row.push(`"${i.name}"`, i.qty);
                 csv += row.join(',') + '\n';
             });
         });
 
-        // —————————————————————
-        // 3) download trigger
+        // — download
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         const firstOrderDate = report.length > 0
             ? report[0].timestamp.split(' ')[0]
-            : new Date().toISOString().slice(0, 10);
+            : getTaiwanDateYYYYMMDD();                 // <<< Taiwan date fallback
         a.download = `${firstOrderDate}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-
 
         setModalVisible(false);
         const monthly = localStorage.getItem('monthlyReport');
@@ -258,17 +254,17 @@ export default function Table() {
         localStorage.clear();
         sessionStorage.clear();
 
-        // put dailyreport back
+        // put monthlyReport back
         if (monthly !== null) {
             localStorage.setItem('monthlyReport', monthly);
         }
     }, []);
+
     const onEndOfDayClick = () => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         if (report.length === 0) {
             return alert('今日日報尚無紀錄，無法下載。');
         }
-
         setModalError('');
         setModalUser('');
         setModalPass('');
@@ -280,37 +276,30 @@ export default function Table() {
         setExpenseAmount('');
         setExpenseModalVisible(true);
     };
+
     const handleConfirmExpense = () => {
         const cost = Number(expenseAmount);
         if (!expenseItemName.trim() || isNaN(cost) || cost <= 0) {
             return alert('請輸入正確的項目名稱與金額');
         }
 
-        // build a negative‐total record
-        const now = (() => {
-            const d = new Date();
-            const pad2 = n => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
-                `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-        })();
-
+        // build a negative‐total record with Taiwan timestamp
+        const now = getTaiwanTimestamp();            // <<< Taiwan time
         const entry = {
             timestamp: now,
-            tableId: '',           // no table           // no guests
+            tableId: '',
             items: [{ id: '', name: expenseItemName, qty: 1 }],
-            total: -cost,          // negative amount
+            total: -cost,
             method: 'Expense',
             cardNumber: '',
             discount: 0,
             customAmount: 0
         };
 
-        // — push into dailyreport —
         const daily = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         daily.push(entry);
         localStorage.setItem('dailyreport', JSON.stringify(daily));
 
-        // — push into monthlyReport —
         const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
         monthly.push(entry);
         localStorage.setItem('monthlyReport', JSON.stringify(monthly));
@@ -318,7 +307,6 @@ export default function Table() {
         setExpenseModalVisible(false);
         alert(`已記錄支出：${expenseItemName} –${cost}`);
     };
-
 
     return (
         <div className="table">
@@ -340,6 +328,7 @@ export default function Table() {
                     </ul>
                 </aside>
             )}
+
             <main className="main">
                 <div className="a-top-group">
                     <button
@@ -377,13 +366,10 @@ export default function Table() {
                         {renderBtn('A4', 'shape vrectangle light')}
                         {renderBtn('A3', 'shape vrectangle light')}
                     </div>
-
                 </div>
-
             </main>
 
             <aside className="right-sidebar">
-                {/*<h4>Quick Views</h4>*/}
                 <button onClick={goTo('/unpaid')}>未付款桌號
                     {unpaidTables.length > 0 && <span className="badge">{unpaidTables.length}</span>}
                 </button>
@@ -391,14 +377,12 @@ export default function Table() {
                 <button onClick={goTo('/takeout')}>外帶
                     {takeoutCount > 0 && <span className="badge">{takeoutCount}</span>}
                 </button>
+
                 <button onClick={goTo('/reservations')}>訂位
                     {todayReservations > 0 && <span className="badge">{todayReservations}</span>}
                 </button>
 
-
-                <div className="daily-sales">
-                    今日總額: ${dailyTotal}
-                </div>
+                <div className="daily-sales">今日總額: ${dailyTotal}</div>
 
                 {clockedInAt && (
                     <div style={{ margin: '0.5rem 0', fontWeight: 'bold' }}>
@@ -449,7 +433,6 @@ export default function Table() {
                     支出
                 </button>
 
-
                 <button
                     className="show-summary-button"
                     onClick={showDailySummary}
@@ -471,20 +454,10 @@ export default function Table() {
                 >
                     月報
                 </button>
-                <img
-                    src={MikoLogo}
-                    alt="Miko Logo"
-                    className="miko-logo"
-                />
 
-                {/*<button
-                    className="clear-storage-button"
-                    onClick={clearAll}
-                    style={{ marginTop: '1rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
-                >
-                    Clear All Storage
-                </button>*/}
+                <img src={MikoLogo} alt="Miko Logo" className="miko-logo" />
             </aside>
+
             {expenseModalVisible && (
                 <div className="modal-overlay">
                     <div className="login-modal">
@@ -508,6 +481,7 @@ export default function Table() {
                     </div>
                 </div>
             )}
+
             {modalVisible && (
                 <div className="modal-overlay">
                     <div className="login-modal">

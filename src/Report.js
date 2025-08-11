@@ -13,6 +13,24 @@ import {
 } from 'recharts';
 import './Report.css';
 
+// --- Taiwan time helpers ---
+function getTaiwanDateYYYYMMDD() {
+  const now = new Date();
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const tw = new Date(utcMs + 8 * 60 * 60000); // UTC+8
+  const y = tw.getFullYear();
+  const m = String(tw.getMonth() + 1).padStart(2, '0');
+  const d = String(tw.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+/** Convert Taiwan-local YYYY-MM-DD + HH:mm to a UTC instant (ms) */
+function taiwanEpochMs(dateStr, timeStr) {
+  const [Y, M, D] = dateStr.split('-').map(Number);
+  const [h, m] = timeStr.split(':').map(Number);
+  // Represent that Taiwan local time as UTC by subtracting 8 hours.
+  return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
+}
+
 export default function Reports() {
   const navigate = useNavigate();
   const [itemData, setItemData] = useState([]);
@@ -33,13 +51,13 @@ export default function Reports() {
       );
     setItemData(Object.entries(totals).map(([name, qty]) => ({ name, qty })));
 
-    // 2) Compute total revenue (non‑Expense)
+    // 2) Total revenue (non-Expense)
     const revenue = report
       .filter(entry => entry.method !== 'Expense')
       .reduce((sum, e) => sum + (e.total || 0), 0);
     setMonthlyRevenue(revenue);
 
-    // 3) Compute total expense (sum of absolute values of negative totals)
+    // 3) Total expense (abs of negative totals)
     const expense = report
       .filter(entry => entry.method === 'Expense')
       .reduce((sum, e) => sum + Math.abs(e.total || 0), 0);
@@ -47,7 +65,6 @@ export default function Reports() {
   }, []);
 
   const exportMonthlyReportCSV = useCallback(() => {
-    // pull in your full month’s array
     const report = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
     if (!report.length) {
       return alert('本月報表為空，無法下載。');
@@ -61,7 +78,7 @@ export default function Reports() {
       });
     });
 
-    // 2) compute payment sums
+    // 2) payment sums
     let cashSum = 0, lineSum = 0, expenseSum = 0;
     report.forEach(entry => {
       if (entry.method === 'Cash') cashSum += entry.total;
@@ -72,7 +89,6 @@ export default function Reports() {
     // 3) build CSV
     const BOM = '\uFEFF';
     let csv = BOM;
-
     csv += '項目,總數量\n';
     Object.entries(itemTotals).forEach(([name, qty]) => {
       csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
@@ -81,29 +97,29 @@ export default function Reports() {
     csv += `LinePay總額,${lineSum}\n`;
     csv += `月支出,${expenseSum}\n`;
 
-    // 4) download
+    // 4) download (filename uses Taiwan date)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `monthlyreport_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `monthlyreport_${getTaiwanDateYYYYMMDD()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
 
     // ───────────────────────────────────────────────────────────────
-    // NEW: Preserve future reservations before clearing storage
-    const now = new Date();
+    // Preserve future reservations (based on TAIWAN time)
     const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-
+    const nowMs = Date.now(); // current UTC instant
     const futureReservations = reservations.filter(r => {
       if (!r?.date || !r?.time) return false;
-      // Build a comparable Date from yyyy-mm-dd + HH:mm
-      const t = new Date(`${r.date}T${r.time.length === 5 ? r.time : String(r.time).padStart(5, '0')}:00`);
-      // keep if strictly in the future (and not cancelled)
-      return t.getTime() > now.getTime() && r.status !== 'Cancelled';
+      const t = taiwanEpochMs(
+        r.date,
+        r.time.length === 5 ? r.time : String(r.time).padStart(5, '0')
+      );
+      return t > nowMs && r.status !== 'Cancelled';
     });
 
-    // clear everything as before
+    // clear storage
     localStorage.clear();
     sessionStorage.clear();
 
@@ -112,8 +128,6 @@ export default function Reports() {
       localStorage.setItem('reservations', JSON.stringify(futureReservations));
     }
   }, []);
-
-
 
   return (
     <div className="reports-container">
