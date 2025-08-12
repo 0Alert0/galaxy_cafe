@@ -3,6 +3,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Reservations.css';
 
+const HOURS = Array.from({ length: 24 }, (_, h) => String(h).padStart(2, '0'));
+const MINUTES_5 = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
+
+function splitTime(t = '') {
+  const [hh = '09', mm = '00'] = t.split(':');
+  return { hh, mm };
+}
+
 // --- Taiwan time helpers ---
 function getTaiwanDateYYYYMMDD() {
   const now = new Date();
@@ -14,16 +22,23 @@ function getTaiwanDateYYYYMMDD() {
   return `${y}-${m}-${d}`;
 }
 
-/**
- * Convert a YYYY-MM-DD + HH:mm (Taiwan local) into an epoch ms,
- * independent of the machine’s timezone.
- */
+/** Convert Taiwan local YYYY-MM-DD + HH:mm to UTC epoch ms */
 function taiwanEpochMs(dateStr, timeStr) {
   const [Y, M, D] = dateStr.split('-').map(Number);
   const [h, m] = timeStr.split(':').map(Number);
-  // Represent the Taiwan local time as a UTC instant by subtracting 8 hours.
   return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
 }
+
+
+/** Pretty date like 2025/08/12（二） — correct weekday */
+function formatDisplayDate(dateStr) {
+  const [Y, M, D] = dateStr.split('-').map(Number);
+  // Use UTC midnight for that calendar date; no timezone shift.
+  const d = new Date(Date.UTC(Y, M - 1, D, 0, 0, 0, 0));
+  const wd = '日一二三四五六'[d.getUTCDay()];
+  return `${Y}/${String(M).padStart(2, '0')}/${String(D).padStart(2, '0')}（${wd}）`;
+}
+
 
 export default function ReservationsPage() {
   const navigate = useNavigate();
@@ -40,13 +55,10 @@ export default function ReservationsPage() {
     phone: '',
     partySize: 1,
     tableId: '',
-    date: '',
-    time: '',
+    date: getTaiwanDateYYYYMMDD(), // default to today (Taiwan)
+    time: '09:00',
     notes: '',
   });
-
-  // Filter by date (defaults to Taiwan "today")
-  const [filterDate, setFilterDate] = useState(getTaiwanDateYYYYMMDD);
 
   // Keep in sync if another tab/page updates localStorage
   useEffect(() => {
@@ -65,14 +77,26 @@ export default function ReservationsPage() {
     setList(next);
   };
 
-  // Computed list for the selected day
-  const dayList = useMemo(
-    () =>
-      list
-        .filter((r) => r.date === filterDate)
-        .sort((a, b) => a.time.localeCompare(b.time)),
-    [list, filterDate]
-  );
+  // All reservations grouped by date, each group sorted by time (Taiwan)
+  const { orderedDates, byDate } = useMemo(() => {
+    const sorted = [...list].sort((a, b) => {
+      const ta = taiwanEpochMs(a.date, a.time);
+      const tb = taiwanEpochMs(b.date, b.time);
+      if (ta !== tb) return ta - tb;
+      return (a.createdAt || '') > (b.createdAt || '') ? 1 : -1;
+    });
+
+    const map = {};
+    sorted.forEach((r) => {
+      (map[r.date] ||= []).push(r);
+    });
+
+    const dates = Object.keys(map).sort(
+      (da, db) => taiwanEpochMs(da, '00:00') - taiwanEpochMs(db, '00:00')
+    );
+
+    return { orderedDates: dates, byDate: map };
+  }, [list]);
 
   // Add a new reservation
   const addReservation = () => {
@@ -80,8 +104,12 @@ export default function ReservationsPage() {
       alert('請輸入姓名、日期與時間');
       return;
     }
+    if (!/^\d{10}$/.test(form.phone.trim())) {
+      alert('請輸入正確的10位數字電話號碼');
+      return;
+    }
 
-    // Conflict check (90 min block) in Taiwan time if table chosen
+    // Conflict check (90 min) if table chosen
     if (form.tableId) {
       const blockMs = 90 * 60 * 1000;
       const tNew = taiwanEpochMs(form.date, form.time);
@@ -108,7 +136,7 @@ export default function ReservationsPage() {
       time: form.time,
       notes: form.notes || '',
       status: 'Booked', // Booked | Seated | Completed | No-show | Cancelled
-      createdAt: new Date().toISOString(), // keep ISO UTC for audit
+      createdAt: new Date().toISOString(),
     };
 
     save([...list, r]);
@@ -118,8 +146,8 @@ export default function ReservationsPage() {
       phone: '',
       partySize: 1,
       tableId: '',
-      date: '',
-      time: '',
+      date: getTaiwanDateYYYYMMDD(),
+      time: '09:00',
       notes: '',
     });
   };
@@ -130,16 +158,14 @@ export default function ReservationsPage() {
     save(next);
   };
 
+  // 帶位：always mark Seated; if table is set, open that table; else go home
   const checkIn = (r) => {
-    // Mark as seated
     setStatus(r.id, 'Seated');
-
-    // Optional: prefill guests on TablePage
-    // sessionStorage.setItem('pendingGuests', String(r.partySize));
-
-    // Go to table (fallback A1)
-    const target = r.tableId || 'A1';
-    navigate(`/TablePage/${target}`);
+    if (r.tableId) {
+      navigate(`/TablePage/${r.tableId}`);
+    } else {
+      navigate('/');
+    }
   };
 
   // Manual remove with the “×” button
@@ -153,73 +179,73 @@ export default function ReservationsPage() {
       <header className="rsv-header">
         <h1>訂位</h1>
         <div className="rsv-controls">
-          <input
-            type="date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-          />
           <button onClick={() => setShowModal(true)}>新增訂位</button>
           <button onClick={() => navigate('/')}>← 回首頁</button>
         </div>
       </header>
 
-      {dayList.length ? (
-        <ul className="rsv-list">
-          {dayList.map((r) => (
-            <li
-              key={r.id}
-              className={`rsv-card status-${r.status.toLowerCase()}`}
-              style={{ position: 'relative' }}
-            >
-              {/* small X close button */}
-              <button
-                className="rsv-close"
-                onClick={() => handleRemoveReservation(r.id)}
-                aria-label="移除訂位"
-                title="移除訂位"
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 10,
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '1.1rem',
-                  lineHeight: 1,
-                  cursor: 'pointer',
-                  color: '#999',
-                }}
-              >
-                ×
-              </button>
+      {orderedDates.length ? (
+        orderedDates.map((date) => (
+          <section key={date} className="rsv-day">
+            <h2 className="rsv-day-title">{formatDisplayDate(date)}</h2>
+            <ul className="rsv-list">
+              {byDate[date].map((r) => (
+                <li
+                  key={r.id}
+                  className={`rsv-card status-${r.status.toLowerCase()}`}
+                  style={{ position: 'relative' }}
+                >
+                  {/* small X close button */}
+                  <button
+                    className="rsv-close"
+                    onClick={() => handleRemoveReservation(r.id)}
+                    aria-label="移除訂位"
+                    title="移除訂位"
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 10,
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '1.1rem',
+                      lineHeight: 1,
+                      cursor: 'pointer',
+                      color: '#999',
+                    }}
+                  >
+                    ×
+                  </button>
 
-              <div className="row">
-                <strong>{r.time}</strong>
-                <span>
-                  {r.name}（{r.partySize}人）
-                </span>
-              </div>
-              <div className="row sub">
-                <span>桌號: {r.tableId || '未指定'}</span>
-                <span>電話: {r.phone || '—'}</span>
-              </div>
-              {r.notes && <div className="notes">備註：{r.notes}</div>}
+                  <div className="row">
+                    <strong>{r.time}</strong>
+                    <span>
+                      {r.name}（{r.partySize}人）
+                    </span>
+                  </div>
+                  <div className="row sub">
+                    <span>桌號: {r.tableId || '未指定'}</span>
+                    <span>電話: {r.phone || '—'}</span>
+                  </div>
+                  {r.notes && <div className="notes">備註：{r.notes}</div>}
 
-              <div className="actions">
-                {r.status === 'Booked' ? (
-                  <>
-                    <button onClick={() => checkIn(r)}>帶位</button>
-                    <button onClick={() => setStatus(r.id, 'Cancelled')}>取消</button>
-                    <button onClick={() => setStatus(r.id, 'No-show')}>未到</button>
-                  </>
-                ) : (
-                  <span className="pill">{r.status}</span>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
+                  <div className="actions">
+                    {r.status === 'Booked' ? (
+                      <>
+                        <button onClick={() => checkIn(r)}>帶位</button>
+                        <button onClick={() => setStatus(r.id, 'Cancelled')}>取消</button>
+                        <button onClick={() => setStatus(r.id, 'No-show')}>未到</button>
+                      </>
+                    ) : (
+                      <span className="pill">{r.status}</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))
       ) : (
-        <p className="none">本日尚無訂位</p>
+        <p className="none">目前尚無任何訂位</p>
       )}
 
       {showModal && (
@@ -249,31 +275,85 @@ export default function ReservationsPage() {
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
               />
-              <input
-                type="time"
-                value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })}
-              />
+
+              {/* 5-minute time selectors */}
+              <div className="time-5-selects" style={{ display: 'flex', gap: '0.5rem' }}>
+                <select
+                  value={splitTime(form.time).hh}
+                  onChange={(e) => {
+                    const hh = e.target.value;
+                    const mm = splitTime(form.time).mm;
+                    setForm({ ...form, time: `${hh}:${mm}` });
+                  }}
+                >
+                  {HOURS.map((h) => (
+                    <option key={h} value={h}>
+                      {h}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  value={splitTime(form.time).mm}
+                  onChange={(e) => {
+                    const mm = e.target.value;
+                    const hh = splitTime(form.time).hh;
+                    setForm({ ...form, time: `${hh}:${mm}` });
+                  }}
+                >
+                  {MINUTES_5.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <select
                 value={form.tableId}
                 onChange={(e) => setForm({ ...form, tableId: e.target.value })}
               >
                 <option value="">未指定桌</option>
                 {[
-                  'A1','A2','A3','A4','A5','A6',
-                  'B1','B2','B3','B4','B5','B6','B7','B8','B9','B10','B11','B12',
-                  'C1','C2','C3','C4','C5',
+                  'A1',
+                  'A2',
+                  'A3',
+                  'A4',
+                  'A5',
+                  'A6',
+                  'A7',
+                  'B1',
+                  'B2',
+                  'B3',
+                  'B4',
+                  'B5',
+                  'B6',
+                  'B7',
+                  'B8',
+                  'B9',
+                  'B10',
+                  'B11',
+                  'B12',
+                  'C1',
+                  'C2',
+                  'C3',
+                  'C4',
+                  'C5',
                   'Take Out',
                 ].map((t) => (
-                  <option key={t} value={t}>{t}</option>
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
                 ))}
               </select>
+
               <input
                 placeholder="備註"
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
               />
             </div>
+
             <div className="modal-actions">
               <button onClick={() => setShowModal(false)}>取消</button>
               <button onClick={addReservation}>確認</button>

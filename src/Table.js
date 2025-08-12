@@ -32,6 +32,17 @@ function getTaiwanTimestamp() {
     return `${y}-${m}-${d} ${h}:${mi}:${s}`;
 }
 
+function taiwanEpochMs(dateStr, timeStr) {
+    const [Y, M, D] = dateStr.split('-').map(Number);
+    const [h, m] = timeStr.split(':').map(Number);
+    // represent TW local time as UTC by subtracting 8 hours
+    return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
+}
+function getTaiwanNowMs() {
+    const now = new Date();
+    return now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 60 * 60000;
+}
+
 export default function Table() {
     const navigate = useNavigate();
     const goReports = () => navigate('/report');
@@ -53,6 +64,7 @@ export default function Table() {
     const [expenseAmount, setExpenseAmount] = useState('');
     const [todayReservations, setTodayReservations] = useState(0);
     const [todayRsvs, setTodayRsvs] = useState([]);
+    const [dueSoonTables, setDueSoonTables] = useState(new Set());
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
@@ -100,7 +112,34 @@ export default function Table() {
         const onStorage = (e) => { if (e.key === 'reservations') load(); };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
+
     }, []);
+
+    // 2) Recompute “due soon” tables every minute (separate effect)
+    useEffect(() => {
+        const computeDueSoon = () => {
+            const all = JSON.parse(localStorage.getItem('reservations') || '[]');
+            const today = getTaiwanDateYYYYMMDD();
+            const nowMs = getTaiwanNowMs();
+            const THIRTY_MIN = 30 * 60 * 1000;
+
+            const ids = new Set();
+            all
+                .filter(r => r.status === 'Booked' && r.date === today && r.tableId)
+                .forEach(r => {
+                    const start = taiwanEpochMs(r.date, r.time);
+                    const diff = start - nowMs;
+                    if (diff >= 0 && diff <= THIRTY_MIN) ids.add(r.tableId);
+                });
+
+            setDueSoonTables(ids);
+        };
+
+        computeDueSoon();                       // run once immediately
+        const t = setInterval(computeDueSoon, 60 * 1000);
+        return () => clearInterval(t);
+    }, []);
+
 
     // ─── Helpers ──────────────────────────────────────────────────
     const isUnpaid = useCallback(id => unpaidTables.includes(id), [unpaidTables]);
@@ -131,12 +170,13 @@ export default function Table() {
     const renderBtn = (id, shapeClass = 'shape square light') => (
         <button
             key={id}
-            className={`${shapeClass}${isUnpaid(id) ? ' unpaid' : ''}`}
+            className={`${shapeClass}${isUnpaid(id) ? ' unpaid' : ''}${dueSoonTables.has(id) ? ' due-soon' : ''}`}
             onClick={() => handleClick(id)}
         >
             {id}
         </button>
     );
+
 
     // show summary: total qty, total cash & line-pay
     const showDailySummary = useCallback(() => {

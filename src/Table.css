@@ -413,3 +413,16 @@
   margin-top: 0.5rem;
   word-break: break-word;
 }
+
+/* Reservation starting within 30 minutes */
+.shape.due-soon {
+  border-color: #ffad33 !important;
+  box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.35), 0 6px 14px var(--shadow-light);
+  background: linear-gradient(180deg, rgba(255, 237, 200, 0.65), rgba(255, 255, 255, 0.8));
+  animation: dueSoonPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes dueSoonPulse {
+  from { box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.25), 0 6px 14px var(--shadow-light); }
+  to   { box-shadow: 0 0 0 5px rgba(255, 173, 51, 0.45), 0 8px 18px var(--shadow-strong); }
+}
