@@ -177,6 +177,7 @@ export default function TablePage() {
       { id: '1200', label: '寄杯卡 1200', sub: '', price: 1200 },
       { id: '1400', label: '寄杯卡 1400', sub: '', price: 1400 },
       { id: '1500', label: '寄杯卡 1500', sub: '', price: 1500 },
+      { id: '3500', label: '寄杯卡 3500', sub: '', price: 3500 }
 
     ],
     活動: [
