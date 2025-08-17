@@ -65,6 +65,10 @@ export default function Table() {
     const [todayReservations, setTodayReservations] = useState(0);
     const [todayRsvs, setTodayRsvs] = useState([]);
     const [dueSoonTables, setDueSoonTables] = useState(new Set());
+    const [quickPayTableId, setQuickPayTableId] = useState(null);
+    const [showSplit, setShowSplit] = useState(false);
+    const [splitQtys, setSplitQtys] = useState({});
+
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
@@ -139,17 +143,105 @@ export default function Table() {
         const t = setInterval(computeDueSoon, 60 * 1000);
         return () => clearInterval(t);
     }, []);
+    const getUnpaidOrderByTableId = useCallback((tableId) => {
+        const all = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
+        const index = all.findIndex(o => o.tableId === tableId);
+        const order = index >= 0 ? all[index] : null;
+        return { all, index, order };
+    }, []);
+
+    // 付款
+    const checkoutForTable = useCallback((tableId) => {
+        const { index } = getUnpaidOrderByTableId(tableId);
+        if (index < 0) return;
+        setQuickPayTableId(null);
+        navigate(`/orderdetail/${index}`);
+    }, [getUnpaidOrderByTableId, navigate]);
+
+    // 更改訂單
+    const modifyOrderForTable = useCallback((tableId) => {
+        const { order } = getUnpaidOrderByTableId(tableId);
+        if (!order) return;
+        localStorage.setItem('cart', JSON.stringify(order.items));
+        setQuickPayTableId(null);
+        navigate(`/TablePage/${order.tableId}`);
+    }, [getUnpaidOrderByTableId, navigate]);
+
+    // 分開付 ─ open modal
+    const openSplitForTable = useCallback((tableId) => {
+        const { order } = getUnpaidOrderByTableId(tableId);
+        if (!order) return;
+        const zeroed = {};
+        order.items.forEach(it => { zeroed[it.id] = 0; });
+        setSplitQtys(zeroed);
+        setShowSplit(true);
+    }, [getUnpaidOrderByTableId]);
+
+    // Change one split quantity
+    const changeSplitQty = useCallback((tableId, itemId, v) => {
+        const { order } = getUnpaidOrderByTableId(tableId);
+        const max = order?.items.find(it => it.id === itemId)?.qty ?? 0;
+        const val = Math.max(0, Math.min(Number(v) || 0, max));
+        setSplitQtys(q => ({ ...q, [itemId]: val }));
+    }, [getUnpaidOrderByTableId]);
+
+    // Confirm split
+    const confirmSplitForTable = useCallback((tableId) => {
+        const { all, index, order } = getUnpaidOrderByTableId(tableId);
+        if (!order) return;
+
+        const splitItems = [];
+        const remainItems = [];
+        order.items.forEach(it => {
+            const s = parseInt(splitQtys[it.id], 10) || 0;
+            if (s > 0) splitItems.push({ ...it, qty: s });
+            const r = it.qty - s;
+            if (r > 0) remainItems.push({ ...it, qty: r });
+        });
+
+        if (splitItems.length === 0) {
+            alert('至少選擇一項');
+            return;
+        }
+
+        // Update original order (remainder)
+        all[index] = {
+            ...order,
+            items: remainItems,
+            total: remainItems.reduce((sum, it) => sum + it.price * it.qty, 0),
+        };
+        localStorage.setItem('unpaidOrders', JSON.stringify(all));
+
+        setShowSplit(false);
+        setQuickPayTableId(null);
+
+        // Go to orderdetail with split info (same as UnpaidTablePage)
+        navigate(`/orderdetail/${index}`, {
+            state: {
+                source: 'split',
+                splitItems,
+                guests: order.guests,
+                tableId: order.tableId,
+            },
+        });
+    }, [getUnpaidOrderByTableId, splitQtys, navigate]);
 
 
     // ─── Helpers ──────────────────────────────────────────────────
     const isUnpaid = useCallback(id => unpaidTables.includes(id), [unpaidTables]);
     const goTo = useCallback(path => () => navigate(path), [navigate]);
-    const handleClick = useCallback(id => navigate(`/TablePage/${id}`), [navigate]);
-    const clearAll = useCallback(() => {
+    const handleClick = useCallback((id) => {
+        if (unpaidTables.includes(id)) {
+            setQuickPayTableId(id);        // open quick-pay panel
+        } else {
+            navigate(`/TablePage/${id}`);  // normal navigation
+        }
+    }, [navigate, unpaidTables]);
+    /*const clearAll = useCallback(() => {
         localStorage.clear();
         sessionStorage.clear();
         window.location.reload();
-    }, []);
+    }, []);*/
 
     const tryClockIn = useCallback(() => {
         if (username !== VALID_USER || password !== VALID_PASS) {
@@ -347,6 +439,7 @@ export default function Table() {
         setExpenseModalVisible(false);
         alert(`已記錄支出：${expenseItemName} –${cost}`);
     };
+  
 
     return (
         <div className="table">
@@ -497,6 +590,73 @@ export default function Table() {
 
                 <img src={MikoLogo} alt="Miko Logo" className="miko-logo" />
             </aside>
+            {/* Quick-Pay overlay for unpaid table */}
+            {quickPayTableId && (() => {
+                const { order } = getUnpaidOrderByTableId(quickPayTableId);
+                if (!order) return null;
+                const total = Number(order.total || 0);
+               
+
+                return (
+                    <div className="modal-overlay" onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}>
+                        <div className="quickpay-card" onClick={(e) => e.stopPropagation()}>
+                            <div className="quickpay-header">
+                                <h3>{quickPayTableId}</h3>
+                                <button className="qp-close" onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}>✕</button>
+                            </div>
+
+                            <div className="quickpay-body">
+                                
+                                <div className="qp-row"><strong>總共金額：</strong>${total}</div>
+                            </div>
+
+                            <div className="quickpay-actions">
+                                <button className="qp-pay" onClick={() => checkoutForTable(quickPayTableId)}>付款</button>
+                                <button className="qp-edit" onClick={() => modifyOrderForTable(quickPayTableId)}>更改訂單</button>
+                                <button className="qp-split" onClick={() => openSplitForTable(quickPayTableId)}>分開付</button>
+                            </div>
+
+                            {/* Split modal inside quick-pay */}
+                            {showSplit && (
+                                <div className="split-area">
+                                    <h4>分開付</h4>
+                                    <ul className="split-list">
+                                        {order.items.map(it => (
+                                            <li key={it.id}>
+                                                <span>{it.name}（最多{it.qty}）</span>
+                                                <div className="split-qty-group">
+                                                    <button
+                                                        className="split-btn minus"
+                                                        onClick={() => changeSplitQty(quickPayTableId, it.id, (splitQtys[it.id] || 0) - 1)}
+                                                        disabled={(splitQtys[it.id] || 0) <= 0}
+                                                    >–</button>
+                                                    <input
+                                                        type="number"
+                                                        min="0"
+                                                        max={it.qty}
+                                                        value={splitQtys[it.id] ?? 0}
+                                                        onChange={e => changeSplitQty(quickPayTableId, it.id, Number(e.target.value))}
+                                                    />
+                                                    <button
+                                                        className="split-btn plus"
+                                                        onClick={() => changeSplitQty(quickPayTableId, it.id, (splitQtys[it.id] || 0) + 1)}
+                                                        disabled={(splitQtys[it.id] || 0) >= it.qty}
+                                                    >＋</button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <div className="modal-actions" style={{ marginTop: '.5rem' }}>
+                                        <button onClick={() => setShowSplit(false)}>取消</button>
+                                        <button onClick={() => confirmSplitForTable(quickPayTableId)}>確認分開付</button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            })()}
+
 
             {expenseModalVisible && (
                 <div className="modal-overlay">
