@@ -1,12 +1,13 @@
 // src/components/TablePage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import CustomDrinkModal from './CustomDrinkModal';          // ADDED
+import './CustomDrinkModal.css';                            // ADDED
 import './TablePage.css';
 
 export default function TablePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
 
   // load persisted cart (or empty)
   const [cart, setCart] = useState(() => {
@@ -18,7 +19,7 @@ export default function TablePage() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // add an item only once per click
+  // add an item only once per click (for一般品項)
   const handleAdd = useCallback(item => {
     setCart(prev => {
       const exists = prev.find(i => i.id === item.id);
@@ -34,6 +35,28 @@ export default function TablePage() {
           { id: item.id, name: item.label, price: item.price ?? 0, qty: 1 }
         ];
       }
+    });
+  }, []);
+
+  // ADDED: add custom drink returned from modal (含 qty/名稱細節/去重合併)
+  const addCustomToCart = useCallback((customItem) => {
+    setCart(prev => {
+      const idx = prev.findIndex(i => i.id === customItem.id);
+      const next = [...prev];
+      const qtyToAdd = Number(customItem.qty) || 1;
+      const price = Number(customItem.price) || 0;
+      if (idx >= 0) {
+        next[idx] = { ...next[idx], qty: Number(next[idx].qty) + qtyToAdd };
+      } else {
+        next.push({
+          id: customItem.id,
+          name: customItem.name || customItem.label || '客製調酒',
+          price,
+          qty: qtyToAdd,
+          options: customItem.options // optional, 保留將來需要可用
+        });
+      }
+      return next;
     });
   }, []);
 
@@ -97,7 +120,6 @@ export default function TablePage() {
       { id: 'espresso-romano', label: '西西里咖啡', sub: 'Espresso Romano', price: 140 },
       { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 150 },
       { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 }
-
     ],
     '茶 / 果汁 / 無咖啡因飲品': [
       { id: 'iced-green-tea', label: '(冰) 綠茶', sub: '(Iced) Green Tea', price: 80 },
@@ -138,7 +160,7 @@ export default function TablePage() {
       { id: 'rum-coke', label: 'Rum & Coke', sub: '', price: 300 },
       { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
       { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
-      { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true }
+      { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true } // ← 這顆會叫出彈窗
     ],
     啤酒: [
       { id: 'budweiser', label: '百威', sub: 'Budweiser', price: 100 },
@@ -160,7 +182,6 @@ export default function TablePage() {
       { id: 'garlic-thick-slice', label: '香蒜厚片', sub: 'Garlic', price: 80 },
       { id: 'matcha-thick-slice', label: '抹茶奶酥厚片', sub: 'Matcha', price: 80 },
       { id: 'two-flavors-thick-slice', label: '雙拼厚片', sub: '2 Flavors', price: 100 }
-
     ],
     '點心 / 炸物': [
       { id: 'brownie-cake', label: '布朗尼蛋糕', sub: 'Brownie Cake', price: 130 },
@@ -178,7 +199,6 @@ export default function TablePage() {
       { id: '1400', label: '寄杯卡 1400', sub: '', price: 1400 },
       { id: '1500', label: '寄杯卡 1500', sub: '', price: 1500 },
       { id: '3500', label: '寄杯卡 3500', sub: '', price: 3500 }
-
     ],
     活動: [
       { id: '自訂', label: '自訂金額', sub: '', price: '' },
@@ -200,7 +220,6 @@ export default function TablePage() {
       { id: '1899', label: '$1899', sub: '', price: 1899 },
       { id: '1999', label: '$1999', sub: '', price: 1999 }
     ]
-
   };
   const [selectedCat, setSelectedCat] = useState(categories[0]);
   const menuItems = itemsByCategory[selectedCat] ?? [];
@@ -230,17 +249,18 @@ export default function TablePage() {
     setCart([]);
   }, [cart, id, navigate, total]);
 
-
   const goBack = useCallback(() => {
-    // clear the cart in state and storage
     setCart([]);
     localStorage.removeItem('cart');
-    // then navigate home
     navigate('/');
   }, [navigate, setCart]);
+
   const handleRemove = useCallback(itemId => {
     setCart(prev => prev.filter(i => i.id !== itemId));
   }, []);
+
+  // ADDED: 控制客製化 Modal 開關
+  const [customOpen, setCustomOpen] = useState(false);
 
   return (
     <div className="tablepage">
@@ -267,7 +287,11 @@ export default function TablePage() {
             <button
               key={item.id}
               className={`item-btn${item.custom ? ' customize' : ''}`}
-              onClick={() => handleAdd(item)}
+              onClick={() => {
+                // ADDED: 若為「客製化」按鈕，開啟 Modal；其他照舊加入購物車
+                if (item.custom) setCustomOpen(true);
+                else handleAdd(item);
+              }}
             >
               <span>{item.label}</span>
               {item.sub && <span className="sub">{item.sub}</span>}
@@ -322,6 +346,17 @@ export default function TablePage() {
           ← 回首頁
         </button>
       </aside>
+
+      {/* ADDED: 客製化調酒 Modal */}
+      <CustomDrinkModal
+        open={customOpen}
+        onClose={() => setCustomOpen(false)}
+        onAdd={(item) => {
+          addCustomToCart(item);
+          setCustomOpen(false);
+        }}
+        defaultPrice={350}  // 你的調酒基礎價
+      />
     </div>
   );
 }

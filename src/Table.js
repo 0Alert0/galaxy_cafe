@@ -439,7 +439,9 @@ export default function Table() {
         setExpenseModalVisible(false);
         alert(`已記錄支出：${expenseItemName} –${cost}`);
     };
-  
+
+    
+
 
     return (
         <div className="table">
@@ -594,20 +596,44 @@ export default function Table() {
             {quickPayTableId && (() => {
                 const { order } = getUnpaidOrderByTableId(quickPayTableId);
                 if (!order) return null;
-                const total = Number(order.total || 0);
-               
+
+                const items = Array.isArray(order.items) ? order.items : [];
+                const total = items.reduce(
+                    (s, it) => s + (Number(it.price) || 0) * (Number(it.qty) || 0),
+                    0
+                );
 
                 return (
                     <div className="modal-overlay" onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}>
                         <div className="quickpay-card" onClick={(e) => e.stopPropagation()}>
                             <div className="quickpay-header">
                                 <h3>{quickPayTableId}</h3>
-                                <button className="qp-close" onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}>✕</button>
+                                <button
+                                    className="qp-close"
+                                    onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}
+                                >
+                                    ✕
+                                </button>
                             </div>
 
                             <div className="quickpay-body">
-                                
-                                <div className="qp-row"><strong>總共金額：</strong>${total}</div>
+                                {/* ADDED: order items list */}
+                                <ul className="qp-items">
+                                    {items.map(it => {
+                                        const q = Number(it.qty) || 0;
+                                        
+                                        
+                                        return (
+                                            <li key={it.id} className="qp-item">
+                                                <div className="qp-item-name">{it.name}</div>
+                                                <div className="qp-item-meta">x{q}</div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+
+                                {/* total */}
+                                <div className="qp-row qp-total"><strong>總共金額：</strong>${total}</div>
                             </div>
 
                             <div className="quickpay-actions">
@@ -616,12 +642,12 @@ export default function Table() {
                                 <button className="qp-split" onClick={() => openSplitForTable(quickPayTableId)}>分開付</button>
                             </div>
 
-                            {/* Split modal inside quick-pay */}
+                            {/* Split modal inside quick-pay (unchanged) */}
                             {showSplit && (
                                 <div className="split-area">
                                     <h4>分開付</h4>
                                     <ul className="split-list">
-                                        {order.items.map(it => (
+                                        {items.map(it => (
                                             <li key={it.id}>
                                                 <span>{it.name}（最多{it.qty}）</span>
                                                 <div className="split-qty-group">
@@ -656,6 +682,7 @@ export default function Table() {
                     </div>
                 );
             })()}
+
 
 
             {expenseModalVisible && (

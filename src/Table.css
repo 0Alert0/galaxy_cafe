@@ -486,3 +486,47 @@
 .qp-pay  { background: #dff0d8; color: #1e5631; }
 .qp-edit { background: #e7eef7; color: #183a57; }
 .qp-split{ background: #fae3db; color: #7a2e1c; }
+
+/* Quick-Pay header actions */
+.qp-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* round “i” button similar to the close button style */
+.qp-info {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 9999px;
+  background: #6b7280; /* slate-500-ish */
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.qp-info:hover { filter: brightness(1.06); }
+
+
+/* Quick-Pay items list */
+.qp-items {
+  list-style: none;
+  margin: 8px 0 12px;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+.qp-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px dashed #e5e7eb; /* light divider */
+}
+.qp-item:last-child { border-bottom: 0; }
+
+.qp-item-name { font-weight: 500; }
+.qp-item-meta { font-variant-numeric: tabular-nums; color: #555; }
+
+.qp-total { margin-top: 6px; font-weight: 700; }
+
