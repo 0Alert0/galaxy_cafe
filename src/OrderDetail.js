@@ -126,13 +126,13 @@ export default function OrderDetail() {
             }
 
             localStorage.setItem('unpaidOrders', JSON.stringify(unpaid));
-            navigate('/unpaid');
+            navigate('/');
         } else {
             // Mark takeout as paid
             const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') || '[]');
             takeouts[orderIndex].paid = true;
             localStorage.setItem('takeoutOrders', JSON.stringify(takeouts));
-            navigate('/takeout');
+            navigate('/');
         }
     }
 
