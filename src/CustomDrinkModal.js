@@ -14,8 +14,9 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
     const tastes = ['偏酸', '偏甜'];
     const categories = ['茶酒', '奶酒', '果汁', '氣泡飲', '其他'];
     const mains = [
-        '草莓', '葡萄', '芭樂', '芒果', '百香果', '哈密瓜', '香蕉', '蘋果', '養樂多',
-        '焙茶', '檸檬紅茶', '百香綠茶', '柚子烏龍', '新鮮果汁特調'
+        '草莓', '葡萄', '芭樂', '芒果', '百香果', '哈密瓜', '香蕉', '蘋果', '蔓越莓', '柚子', '水蜜桃', '櫻桃','葡萄柚','鳳梨',
+        '焙茶', '檸檬紅茶', '百香綠茶', '柚子烏龍', 
+        '新鮮果汁特調','養樂多','烏梅汁', '雪碧', '可樂', '氣泡水'
     ];
 
     const [strength, setStrength] = useState(strengths[1]); // 正常

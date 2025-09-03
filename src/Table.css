@@ -487,25 +487,7 @@
 .qp-edit { background: #e7eef7; color: #183a57; }
 .qp-split{ background: #fae3db; color: #7a2e1c; }
 
-/* Quick-Pay header actions */
-.qp-head-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 
-/* round “i” button similar to the close button style */
-.qp-info {
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 9999px;
-  background: #6b7280; /* slate-500-ish */
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
-}
-.qp-info:hover { filter: brightness(1.06); }
 
 
 /* Quick-Pay items list */
