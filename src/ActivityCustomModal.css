@@ -1,0 +1,70 @@
+/* 全部樣式以 .activity-modal-root 為 scope，避免外溢覆蓋現有 UI */
+
+/* 背景遮罩（全螢幕） */
+.activity-modal-root {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 內層容器卡片 */
+.activity-modal-root .activity-modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: 420px;
+  max-width: 92vw;
+  padding: 20px;
+}
+
+.activity-modal-root .activity-modal__title {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.activity-modal-root .activity-modal__form {
+  display: grid;
+  gap: 12px;
+}
+
+.activity-modal-root .activity-modal__field {
+  display: grid;
+  gap: 6px;
+}
+
+.activity-modal-root .activity-modal__label {
+  font-size: 14px;
+}
+
+.activity-modal-root .activity-modal__input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+
+.activity-modal-root .activity-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.activity-modal-root .activity-modal__btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.activity-modal-root .activity-modal__btn--primary {
+  border-color: transparent;
+  background: #111;
+  color: #fff;
+}

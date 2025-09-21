@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import CustomDrinkModal from './CustomDrinkModal';          // ADDED
 import './CustomDrinkModal.css';                            // ADDED
 import './TablePage.css';
+import ActivityCustomModal from './ActivityCustomModal';
 
 export default function TablePage() {
   const { id } = useParams();
@@ -263,6 +264,10 @@ export default function TablePage() {
   // ADDED: 控制客製化 Modal 開關
   const [customOpen, setCustomOpen] = useState(false);
 
+  const [activityOpen, setActivityOpen] = useState(false);
+
+
+
   return (
     <div className="tablepage">
       <aside className="sidebar">
@@ -289,9 +294,17 @@ export default function TablePage() {
               key={item.id}
               className={`item-btn${item.custom ? ' customize' : ''}`}
               onClick={() => {
-                // ADDED: 若為「客製化」按鈕，開啟 Modal；其他照舊加入購物車
-                if (item.custom) setCustomOpen(true);
-                else handleAdd(item);
+                if (selectedCat === '活動' && item.id === '自訂') {
+                  setActivityOpen(true);
+                  return;
+                }
+
+                // existing behavior
+                if (item.custom && selectedCat === '調酒') {
+                  setCustomOpen(true);
+                } else {
+                  handleAdd(item);
+                }
               }}
             >
               <span>{item.label}</span>
@@ -358,6 +371,16 @@ export default function TablePage() {
         }}
         defaultPrice={350}  // 你的調酒基礎價
       />
+      <ActivityCustomModal
+        open={activityOpen}
+        onClose={() => setActivityOpen(false)}
+        onAdd={(item) => {
+          addCustomToCart(item);
+          setActivityOpen(false);
+        }}
+      />
+
+
     </div>
   );
 }
