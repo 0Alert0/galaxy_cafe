@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/galaxy_cafe/static/css/main.8107cdab.css",
-    "main.js": "/galaxy_cafe/static/js/main.9ad7b50a.js",
+    "main.css": "/galaxy_cafe/static/css/main.32053beb.css",
+    "main.js": "/galaxy_cafe/static/js/main.154aafdf.js",
     "static/js/453.f2d98bf2.chunk.js": "/galaxy_cafe/static/js/453.f2d98bf2.chunk.js",
     "static/media/Miko.PNG": "/galaxy_cafe/static/media/Miko.a87ea4892fb26b0c7583.PNG",
     "index.html": "/galaxy_cafe/index.html",
-    "main.8107cdab.css.map": "/galaxy_cafe/static/css/main.8107cdab.css.map",
-    "main.9ad7b50a.js.map": "/galaxy_cafe/static/js/main.9ad7b50a.js.map",
+    "main.32053beb.css.map": "/galaxy_cafe/static/css/main.32053beb.css.map",
+    "main.154aafdf.js.map": "/galaxy_cafe/static/js/main.154aafdf.js.map",
     "453.f2d98bf2.chunk.js.map": "/galaxy_cafe/static/js/453.f2d98bf2.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.8107cdab.css",
-    "static/js/main.9ad7b50a.js"
+    "static/css/main.32053beb.css",
+    "static/js/main.154aafdf.js"
   ]
 }
