@@ -119,7 +119,7 @@ export default function TablePage() {
       { id: 'matcha-macchiato', label: '抹茶瑪奇朵', sub: 'Matcha Macchiato', price: 150 },
       { id: 'matcha-latte', label: '抹茶咖啡', sub: 'Matcha Latte', price: 150 },
       { id: 'espresso-romano', label: '西西里咖啡', sub: 'Espresso Romano', price: 150 },
-      { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 150 },
+      { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 180 },
       { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 }
     ],
     '茶 / 果汁 / 無咖啡因飲品': [
@@ -141,7 +141,10 @@ export default function TablePage() {
       { id: 'fruit-tea', label: '水果茶', sub: 'Fruit Tea', price: 150 },
       { id: 'juice', label: '果汁', sub: 'Juice', price: 80 },
       { id: 'flavored-sparkling-water', label: '風味氣泡飲', sub: 'Flavored Sparkling Water', price: 100 },
-      { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 }
+      { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 },
+      { id: 'coke', label: '可樂', sub: 'Coke', price: 80 },
+      { id: 'sprite', label: '雪碧', sub: 'Sprite', price: 80 },
+
     ],
     調酒: [
       { id: 'white-russian', label: '白俄羅斯', sub: 'White Russian', price: 350 },
@@ -161,6 +164,7 @@ export default function TablePage() {
       { id: 'rum-coke', label: 'Rum & Coke', sub: '', price: 300 },
       { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
       { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
+      { id: 'hawaii', label: '夏威夷', sub: '', price: 350 },
       { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true } // ← 這顆會叫出彈窗
     ],
     啤酒: [
