@@ -120,7 +120,9 @@ export default function TablePage() {
       { id: 'matcha-latte', label: '抹茶咖啡', sub: 'Matcha Latte', price: 150 },
       { id: 'espresso-romano', label: '西西里咖啡', sub: 'Espresso Romano', price: 150 },
       { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 180 },
-      { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 }
+      { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 },
+      { id: 'coconut-coffee', label: '椰子咖啡', sub: 'coconut coffee', price: 150 }
+
     ],
     '茶 / 果汁 / 無咖啡因飲品': [
       { id: 'iced-green-tea', label: '(冰) 綠茶', sub: '(Iced) Green Tea', price: 80 },
@@ -165,6 +167,9 @@ export default function TablePage() {
       { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
       { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
       { id: 'hawaii', label: '夏威夷', sub: '', price: 350 },
+      { id: 'mango-pomelo', label: '楊枝甘露', sub: '', price: 350 },
+      { id: 'espresso-martini', label: 'Espresso Martini', sub: '', price: 350 },
+      { id: 'whiskey-sour', label: 'Whiskey Sour', sub: '', price: 350 },
       { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true } // ← 這顆會叫出彈窗
     ],
     啤酒: [
