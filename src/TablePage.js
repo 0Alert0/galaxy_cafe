@@ -121,7 +121,9 @@ export default function TablePage() {
       { id: 'espresso-romano', label: '西西里咖啡', sub: 'Espresso Romano', price: 150 },
       { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 180 },
       { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 },
-      { id: 'coconut-coffee', label: '椰子咖啡', sub: 'coconut coffee', price: 150 }
+      { id: 'coconut-coffee', label: '椰子咖啡', sub: 'coconut coffee', price: 150 },
+      { id: 'pay-cha', label: '焙茶拿鐵', sub: 'Houjicha Latte', price: 180 },
+      
 
     ],
     '茶 / 果汁 / 無咖啡因飲品': [
@@ -141,6 +143,7 @@ export default function TablePage() {
       { id: 'passion-fruit-green-tea', label: '百香綠茶', sub: 'Passion Fruit Green Tea', price: 100 },
       { id: 'milk-tea', label: '鮮奶茶', sub: 'Milk Tea', price: 100 },
       { id: 'fruit-tea', label: '水果茶', sub: 'Fruit Tea', price: 150 },
+      { id: 'Kumquat Lemon', label: '金吉檸檬', sub: 'Kumquat Lemon', price: 100 },
       { id: 'juice', label: '果汁', sub: 'Juice', price: 80 },
       { id: 'flavored-sparkling-water', label: '風味氣泡飲', sub: 'Flavored Sparkling Water', price: 100 },
       { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 },
@@ -149,6 +152,9 @@ export default function TablePage() {
 
     ],
     調酒: [
+      { id: 'pay-cha-cocktail', label: '焙茶拿鐵', sub: 'Houjicha Latte cocktail', price: 350 },
+      { id: 'berry-blend-cocktail', label: '莓果特調', sub: 'berry blend cocktail', price: 350 },
+      { id: 'grasshopper', label: '綠色蚱蜢', sub: 'grasshopper', price: 350 },
       { id: 'white-russian', label: '白俄羅斯', sub: 'White Russian', price: 350 },
       { id: 'yogurt-bubble', label: '優格泡泡', sub: 'Yogurt Bubble', price: 350 },
       { id: 'lemon-cocktail', label: '溫柔鄉', sub: 'Lemon Cocktail', price: 350 },
@@ -163,13 +169,14 @@ export default function TablePage() {
       { id: 'lichi-milk-wine', label: '荔枝奶酒', sub: 'Lichi Milk Wine', price: 350 },
       { id: 'tipsy-milk-tea', label: '(大人鮮奶茶) 焙茶奶酒', sub: 'Tipsy Milk Tea', price: 350 },
       { id: 'shot', label: 'Shot', sub: '(買二送一)', price: 100 },
-      { id: 'rum-coke', label: 'Rum & Coke', sub: '', price: 300 },
-      { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
-      { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
       { id: 'hawaii', label: '夏威夷', sub: '', price: 350 },
       { id: 'mango-pomelo', label: '楊枝甘露', sub: '', price: 350 },
       { id: 'espresso-martini', label: 'Espresso Martini', sub: '', price: 350 },
       { id: 'whiskey-sour', label: 'Whiskey Sour', sub: '', price: 350 },
+      { id: 'rum-coke', label: 'Rum & Coke', sub: '', price: 300 },
+      { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
+      { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
+      { id: 'whisky-soda', label: 'Whisky Soda(highball)', sub: '', price: 300 },
       { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true } // ← 這顆會叫出彈窗
     ],
     啤酒: [
