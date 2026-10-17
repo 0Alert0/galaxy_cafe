@@ -1,12 +1,9 @@
 // src/Table.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { STORE_SETTINGS, STAFF_MEMBERS } from './posConfig';
 import './Table.css';
 import MikoLogo from './Miko.PNG';
-
-const VALID_USER = 'admin';
-const VALID_PASS = '1234';
-const ALLOWED_PUBLIC_IP = '119.15.214.56';
 
 // ─── Taiwan time helpers ─────────────────────────────────────────
 function getTaiwanDateYYYYMMDD() {
@@ -36,7 +33,6 @@ function getTaiwanTimestamp() {
 function taiwanEpochMs(dateStr, timeStr) {
     const [Y, M, D] = dateStr.split('-').map(Number);
     const [h, m] = timeStr.split(':').map(Number);
-    // represent TW local time as UTC by subtracting 8 hours
     return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
 }
 
@@ -52,9 +48,11 @@ export default function Table() {
     // ─── State ────────────────────────────────────────────────────
     const [dailyTotal, setDailyTotal] = useState(0);
     const [publicIp, setPublicIp] = useState(null);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [clockedInAt, setClockedInAt] = useState(() => localStorage.getItem('clockedInAt'));
+    const [selectedStaff, setSelectedStaff] = useState(STAFF_MEMBERS[0]?.name || '');
+    const [staffPin, setStaffPin] = useState('');
+    const [clockedInStaff, setClockedInStaff] = useState(() => {
+        return JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
+    });
     const [unpaidTables, setUnpaidTables] = useState([]);
     const [takeoutCount, setTakeoutCount] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
@@ -73,28 +71,23 @@ export default function Table() {
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
-        // compute today's sales total
         const report = JSON.parse(localStorage.getItem('dailyreport') ?? '[]');
         const sum = report
             .filter(r => r.method === 'Cash' || r.method === 'LinePay')
             .reduce((acc, r) => acc + (r.total ?? 0), 0);
         setDailyTotal(sum);
 
-        // fetch public IP
         fetch('https://api.ipify.org?format=json')
             .then(r => r.json())
             .then(({ ip }) => setPublicIp(ip))
             .catch(() => setPublicIp(null));
 
-        // load unpaid table IDs
         const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]').map(o => o.tableId);
         setUnpaidTables(unpaid);
 
-        // takeouts
         const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
         setTakeoutCount(takeouts.length);
 
-        // left list & reservations badge
         const load = () => {
             const all = JSON.parse(localStorage.getItem('reservations') || '[]');
             const t = getTaiwanDateYYYYMMDD();
@@ -106,13 +99,11 @@ export default function Table() {
         };
         load();
 
-        // live update if other pages modify reservations
         const onStorage = (e) => { if (e.key === 'reservations') load(); };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
-    // 2) Recompute “due soon” tables every minute
     useEffect(() => {
         const computeDueSoon = () => {
             const all = JSON.parse(localStorage.getItem('reservations') || '[]');
@@ -144,7 +135,6 @@ export default function Table() {
         return { all, index, order };
     }, []);
 
-    // 付款
     const checkoutForTable = useCallback((tableId) => {
         const { index } = getUnpaidOrderByTableId(tableId);
         if (index < 0) return;
@@ -152,7 +142,6 @@ export default function Table() {
         navigate(`/orderdetail/${index}`, { state: { source: 'unpaid' } });
     }, [getUnpaidOrderByTableId, navigate]);
 
-    // 更改訂單
     const modifyOrderForTable = useCallback((tableId) => {
         const { order } = getUnpaidOrderByTableId(tableId);
         if (!order) return;
@@ -161,7 +150,6 @@ export default function Table() {
         navigate(`/tablePage/${order.tableId}`);
     }, [getUnpaidOrderByTableId, navigate]);
 
-    // 分開付 ─ open modal
     const openSplitForTable = useCallback((tableId) => {
         const { order } = getUnpaidOrderByTableId(tableId);
         if (!order) return;
@@ -171,7 +159,6 @@ export default function Table() {
         setShowSplit(true);
     }, [getUnpaidOrderByTableId]);
 
-    // Change one split quantity
     const changeSplitQty = useCallback((tableId, itemId, v) => {
         const { order } = getUnpaidOrderByTableId(tableId);
         const max = order?.items.find(it => it.id === itemId)?.qty ?? 0;
@@ -179,7 +166,6 @@ export default function Table() {
         setSplitQtys(q => ({ ...q, [itemId]: val }));
     }, [getUnpaidOrderByTableId]);
 
-    // Confirm split (OrderDetail will subtract items only when payment is confirmed)
     const confirmSplitForTable = useCallback((tableId) => {
         const { index, order } = getUnpaidOrderByTableId(tableId);
         if (!order) return;
@@ -198,7 +184,6 @@ export default function Table() {
         setShowSplit(false);
         setQuickPayTableId(null);
 
-        // Go to orderdetail with split info without modifying localStorage yet
         navigate(`/orderdetail/${index}`, {
             state: {
                 source: 'unpaid',
@@ -209,33 +194,44 @@ export default function Table() {
         });
     }, [getUnpaidOrderByTableId, splitQtys, navigate]);
 
-    // ─── Helpers ──────────────────────────────────────────────────
     const isUnpaid = useCallback(id => unpaidTables.includes(id), [unpaidTables]);
     const goTo = useCallback(path => () => navigate(path), [navigate]);
     const handleClick = useCallback((id) => {
         if (unpaidTables.includes(id)) {
-            setQuickPayTableId(id);        // open quick-pay panel
+            setQuickPayTableId(id);
         } else {
-            navigate(`/tablePage/${id}`);  // normal navigation
+            navigate(`/tablePage/${id}`);
         }
     }, [navigate, unpaidTables]);
 
+    // Multiple Staff Clock-In Handler
     const tryClockIn = useCallback(() => {
-        if (username !== VALID_USER || password !== VALID_PASS) {
-            return alert('Invalid credentials');
+        const staffObj = STAFF_MEMBERS.find(s => s.name === selectedStaff);
+        if (!staffObj || staffObj.pin !== staffPin) {
+            return alert('密碼錯誤 (請輸入正確的6位數PIN碼)');
         }
         if (!publicIp) {
-            return alert('Unable to verify network. Try again shortly.');
+            return alert('無法驗證網路，請稍後再試。');
         }
-        if (publicIp !== ALLOWED_PUBLIC_IP) {
-            return alert(`Clock-in only allowed from office network (your IP: ${publicIp})`);
+        if (publicIp !== STORE_SETTINGS.allowedPublicIp) {
+            return alert(`打卡僅限店內網路 (你的IP: ${publicIp})`);
         }
-        const now = getTaiwanTimestamp();
-        setClockedInAt(now);
-        localStorage.setItem('clockedInAt', now);
-    }, [username, password, publicIp]);
 
-    // small factory to render a table-button
+        // Check if already clocked in today
+        if (clockedInStaff.some(s => s.name === selectedStaff)) {
+            return alert(`${selectedStaff} 今天已經打過卡囉！`);
+        }
+
+        const now = getTaiwanTimestamp();
+        const newRecord = { name: selectedStaff, time: now };
+        const updatedList = [...clockedInStaff, newRecord];
+
+        setClockedInStaff(updatedList);
+        localStorage.setItem('clockedInStaff', JSON.stringify(updatedList));
+        setStaffPin('');
+        alert(`${selectedStaff} 打卡成功！`);
+    }, [selectedStaff, staffPin, publicIp, clockedInStaff]);
+
     const renderBtn = (id, shapeClass = 'shape square light') => (
         <button
             key={id}
@@ -246,7 +242,6 @@ export default function Table() {
         </button>
     );
 
-    // show summary: total qty, total cash & line-pay
     const showDailySummary = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         if (report.length === 0) {
@@ -281,10 +276,8 @@ export default function Table() {
 
     const exportDailyReportCSV = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-        const time = localStorage.getItem('clockedInAt') || '';
-        if (report.length === 0) {
-            return alert('今日日報尚無紀錄，無法下載。');
-        }
+        const staffList = JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
+     
 
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
@@ -303,8 +296,18 @@ export default function Table() {
 
         const BOM = "\uFEFF";
         let csv = BOM;
-        csv += '打卡時間\n';
-        csv += time + "\n";
+        
+        // Add all staff clock-in records at the top of CSV
+        csv += '打卡人員紀錄\n';
+        if (staffList.length > 0) {
+            staffList.forEach(s => {
+                csv += `"${s.name}","${s.time}"\n`;
+            });
+        } else {
+            csv += '無打卡紀錄\n';
+        }
+        csv += '\n';
+
         csv += '項目,總數量\n';
         Object.entries(itemTotals).forEach(([name, qty]) => {
             csv += `"${name.replace(/"/g, '""')}",${qty}\n`;
@@ -351,21 +354,19 @@ export default function Table() {
 
         setModalVisible(false);
 
+        // Clear daily shift data
         localStorage.removeItem('dailyreport');
-        localStorage.removeItem('clockedInAt');
+        localStorage.removeItem('clockedInStaff');
         localStorage.removeItem('takeoutOrders');
         sessionStorage.clear();
 
         setDailyTotal(0);
-        setClockedInAt(null);
+        setClockedInStaff([]);
         setTakeoutCount(0);
     }, []);
 
     const onEndOfDayClick = () => {
-        const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-        if (report.length === 0) {
-            return alert('今日日報尚無紀錄，無法下載。');
-        }
+      
         setModalError('');
         setModalUser('');
         setModalPass('');
@@ -458,7 +459,6 @@ export default function Table() {
                     </div>
                 </div>
 
-                {/* UPDATED A-BOTTOM-GROUP: Left col (A6, A7), Right col (A3, A4, A5) */}
                 <div className="container3">
                     <div className="a-bottom-group">
                         <div className="a-bottom-left">
@@ -489,46 +489,56 @@ export default function Table() {
 
                 <div className="daily-sales">今日總額: ${dailyTotal}</div>
 
-                {clockedInAt && (
-                    <div style={{ margin: '0.5rem 0', fontWeight: 'bold' }}>
-                        打卡時間: {clockedInAt}
-                    </div>
-                )}
+                {/* Clock-In Panel */}
+                <div style={{ marginTop: '0.5rem', background: '#eef2f7', padding: '0.5rem', borderRadius: '6px' }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>員工打卡機</div>
+                    
+                    {clockedInStaff.length > 0 && (
+                        <div style={{ fontSize: '0.75rem', marginBottom: '0.4rem', color: '#333' }}>
+                            已打卡: {clockedInStaff.map(s => `${s.name} (${s.time.slice(11, 16)})`).join(', ')}
+                        </div>
+                    )}
 
-                <form
-                    className="clockin-form"
-                    onSubmit={e => { e.preventDefault(); tryClockIn(); }}
-                    style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem' }}
-                >
-                    <input
-                        placeholder="Username"
-                        value={username}
-                        disabled={!!clockedInAt}
-                        onChange={e => setUsername(e.target.value)}
-                        autoComplete="off"
-                        style={{ padding: '0.5rem' }}
-                    />
-                    <input
-                        placeholder="Password"
-                        value={password}
-                        disabled={!!clockedInAt}
-                        onChange={e => setPassword(e.target.value)}
-                        autoComplete="off"
-                        style={{ padding: '0.5rem' }}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!!clockedInAt}
-                        style={{
-                            padding: '0.5rem',
-                            background: clockedInAt ? '#ccc' : '#000',
-                            color: '#fff',
-                            cursor: clockedInAt ? 'not-allowed' : 'pointer'
-                        }}
+                    <form
+                        onSubmit={e => { e.preventDefault(); tryClockIn(); }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}
                     >
-                        打卡
-                    </button>
-                </form>
+                        <select
+                            value={selectedStaff}
+                            onChange={e => setSelectedStaff(e.target.value)}
+                            style={{ padding: '0.4rem', fontSize: '0.9rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                        >
+                            {STAFF_MEMBERS.map(s => (
+                                <option key={s.name} value={s.name}>{s.name}</option>
+                            ))}
+                        </select>
+
+                        <input
+                            type="password"
+                            maxLength="6"
+                            placeholder="輸入6位數PIN"
+                            value={staffPin}
+                            onChange={e => setStaffPin(e.target.value)}
+                            autoComplete="off"
+                            style={{ padding: '0.4rem', fontSize: '0.9rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                        />
+
+                        <button
+                            type="submit"
+                            style={{
+                                padding: '0.4rem',
+                                background: '#28a745',
+                                color: '#fff',
+                                fontWeight: 'bold',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            上班打卡
+                        </button>
+                    </form>
+                </div>
 
                 <button
                     className="expense-button"
@@ -563,7 +573,6 @@ export default function Table() {
                 <img src={MikoLogo} alt="Miko Logo" className="miko-logo" />
             </aside>
 
-            {/* Quick-Pay overlay for unpaid table */}
             {quickPayTableId && (() => {
                 const { order } = getUnpaidOrderByTableId(quickPayTableId);
                 if (!order) return null;
@@ -684,7 +693,7 @@ export default function Table() {
                             onChange={e => setModalUser(e.target.value)}
                         />
                         <input
-                            type="text"
+                            type="password"
                             placeholder="Password"
                             value={modalPass}
                             onChange={e => setModalPass(e.target.value)}
@@ -693,9 +702,9 @@ export default function Table() {
                         <div className="modal-actions">
                             <button onClick={() => setModalVisible(false)}>取消</button>
                             <button onClick={() => {
-                                if (modalUser !== VALID_USER) {
+                                if (modalUser !== STORE_SETTINGS.validUser) {
                                     setModalError('使用者錯誤');
-                                } else if (modalPass !== VALID_PASS) {
+                                } else if (modalPass !== STORE_SETTINGS.validPass) {
                                     setModalError('密碼錯誤');
                                 } else {
                                     exportDailyReportCSV();

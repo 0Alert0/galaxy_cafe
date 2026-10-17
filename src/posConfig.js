@@ -1,21 +1,23 @@
 // src/posConfig.js
-// ============================================================================
-// ★ GALAXY CAFE POS — CENTRAL CONFIGURATION FILE ★
-// Update all Store Settings, Menu Items, Prices, and Cocktail Options here!
-// ============================================================================
 
-// Optional: If you ever set up a Google Apps Script / JSON endpoint for live updates without GitHub,
-// paste the URL inside the quotes below. Leave as "" to use the settings in this file.
 export const REMOTE_CONFIG_URL = "";
 
-// ─── 1. Store Login & Network IP Settings (Used in Table.js) ────────────────
+// ─── 1. Store Login, IP & Staff Clock-In List ─────────────────────────────
 export const STORE_SETTINGS = {
   validUser: 'admin',
   validPass: '1234',
-  allowedPublicIp: '119.15.214.56', // Update here if store router IP changes
+  allowedPublicIp: '68.109.172.254', //68.109.172.254, 119.15.214.56
 };
 
-// ─── 2. Custom Cocktail Options (Used in CustomDrinkModal.js) ───────────────
+// Add your staff members and their 6-digit PINs here!
+export const STAFF_MEMBERS = [
+  { name: '小雲', pin: '050705' },
+  { name: '謙謙', pin: '123456' },
+  { name: 'Wayne', pin: '600819' },
+  { name: 'Wayne Mom', pin: '600819' }
+];
+
+// ─── 2. Custom Cocktail Options ───────────────────────────────────────────
 export const CUSTOM_DRINK_CONFIG = {
   defaultPrice: 350,
   strengths: ['淡', '正常', '濃'],
@@ -29,7 +31,7 @@ export const CUSTOM_DRINK_CONFIG = {
   ]
 };
 
-// ─── 3. Menu Categories & Items (Used in TablePage.js) ──────────────────────
+// ─── 3. Menu Categories & Items ───────────────────────────────────────────
 export const MENU_CATEGORIES = [
   '咖啡',
   '茶 / 果汁 / 無咖啡因飲品',
