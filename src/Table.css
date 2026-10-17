@@ -47,9 +47,7 @@
   flex-direction: row;
   justify-content: center;
   gap: 2rem;
-  /* initial A5 offset */
-  margin-top: calc(30px);
-  margin-right: calc(60px);
+  margin-top: 30px;
 }
 
 /* ─── C-GROUP (C1–C5) ─────────────────────────────────────────────────── */
@@ -79,21 +77,21 @@
   margin-left: 0.7rem;
 }
 
-/* ─ A-BOTTOM-GROUP (A6, A4, A3) ───────────────────────────────────────── */
+/* ─ A-BOTTOM-GROUP (Left: A6, A7 | Right: A3, A4, A5) ─────────────────── */
 .a-bottom-group {
   display: flex;
-  gap: 1rem;
+  flex-direction: row;
+  align-items: flex-start;
   justify-content: center;
-  margin-left: calc(100px);
+  gap: 4rem;
+  margin-left: 60px;
 }
 
-.a-bottom-group>button:first-child {
-  margin-right: 1rem;
-  margin-top: 2.7rem;
-}
-
-.a-bottom-group>button:nth-child(2) {
-  margin-right: 2.5rem;
+.a-bottom-left,
+.a-bottom-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 /* ─ B-TOP-GROUP (B4–B1) ───────────────────────────────────────────────── */
@@ -188,7 +186,6 @@
   background-color: var(--warn) !important;
   border-color: var(--warn) !important;
   color: #fff !important;
-  
 }
 
 .shape.unpaid::after {
@@ -364,35 +361,34 @@
 }
 
 .left-rsv {
-  width: 250px;              /* wider */
-  min-width: 250px;          /* match width */
-  padding: 1rem 1.25rem;     /* more breathing space */
+  width: 250px;
+  min-width: 250px;
+  padding: 1rem 1.25rem;
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
-  border-radius: 12px;       /* slightly rounder */
-  box-shadow: 0 6px 14px var(--shadow-light); /* deeper shadow */
+  border-radius: 12px;
+  box-shadow: 0 6px 14px var(--shadow-light);
   align-self: flex-start;
 }
 
 .left-rsv h4 {
   margin: 0 0 0.75rem;
   font-weight: bold;
-  font-size: 1.2rem;         /* bigger title */
+  font-size: 1.2rem;
 }
 
 .left-rsv li {
-  padding: 0.6rem 0.75rem;   /* larger clickable space */
+  padding: 0.6rem 0.75rem;
   background: #fff;
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  font-size: 1rem;           /* bigger text for table/time */
+  font-size: 1rem;
 }
 
-/* row with time + table ID side-by-side */
 .rsv-main {
-  display: flex;              /* change from grid to flex */
+  display: flex;
   align-items: center;
-  gap: 1rem;                 /* space between time and table ID */
+  gap: 1rem;
 }
 
 .left-rsv .time {
@@ -404,11 +400,11 @@
 .left-rsv .table {
   font-weight: bold;
   font-size: 1.5rem;
-  display: inline;             /* inline so it stays beside time */
+  display: inline;
 }
 
 .rsv-notes {
-  font-size: 0.9rem;         /* bigger notes */
+  font-size: 0.9rem;
   color: #555;
   margin-top: 0.5rem;
   word-break: break-word;
@@ -426,7 +422,6 @@
   from { box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.25), 0 6px 14px var(--shadow-light); }
   to   { box-shadow: 0 0 0 5px rgba(255, 173, 51, 0.45), 0 8px 18px var(--shadow-strong); }
 }
-
 
 .quickpay-card {
   background: var(--panel-bg);
@@ -487,9 +482,6 @@
 .qp-edit { background: #e7eef7; color: #183a57; }
 .qp-split{ background: #fae3db; color: #7a2e1c; }
 
-
-
-
 /* Quick-Pay items list */
 .qp-items {
   list-style: none;
@@ -503,7 +495,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 6px 0;
-  border-bottom: 1px dashed #e5e7eb; /* light divider */
+  border-bottom: 1px dashed #e5e7eb;
 }
 .qp-item:last-child { border-bottom: 0; }
 
@@ -511,4 +503,3 @@
 .qp-item-meta { font-variant-numeric: tabular-nums; color: #555; }
 
 .qp-total { margin-top: 6px; font-weight: 700; }
-

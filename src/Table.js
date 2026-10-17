@@ -1,4 +1,4 @@
-// src/components/Table.js
+// src/Table.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Table.css';
@@ -18,6 +18,7 @@ function getTaiwanDateYYYYMMDD() {
     const d = String(tw.getDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
 }
+
 function getTaiwanTimestamp() {
     const now = new Date();
     const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
@@ -38,6 +39,7 @@ function taiwanEpochMs(dateStr, timeStr) {
     // represent TW local time as UTC by subtracting 8 hours
     return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
 }
+
 function getTaiwanNowMs() {
     const now = new Date();
     return now.getTime() + now.getTimezoneOffset() * 60000 + 8 * 60 * 60000;
@@ -69,7 +71,6 @@ export default function Table() {
     const [showSplit, setShowSplit] = useState(false);
     const [splitQtys, setSplitQtys] = useState({});
 
-
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
         // compute today's sales total
@@ -93,13 +94,7 @@ export default function Table() {
         const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
         setTakeoutCount(takeouts.length);
 
-        // reservations (badge)
-        const rsv = JSON.parse(localStorage.getItem('reservations') || '[]');
-        const today = getTaiwanDateYYYYMMDD();
-        const count = rsv.filter(r => r.date === today && r.status === 'Booked').length;
-        setTodayReservations(count);
-
-        // left list
+        // left list & reservations badge
         const load = () => {
             const all = JSON.parse(localStorage.getItem('reservations') || '[]');
             const t = getTaiwanDateYYYYMMDD();
@@ -107,7 +102,6 @@ export default function Table() {
                 .filter(r => r.date === t && r.status === 'Booked')
                 .sort((a, b) => a.time.localeCompare(b.time));
             setTodayRsvs(list);
-            // also refresh badge
             setTodayReservations(list.length);
         };
         load();
@@ -116,10 +110,9 @@ export default function Table() {
         const onStorage = (e) => { if (e.key === 'reservations') load(); };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
-
     }, []);
 
-    // 2) Recompute “due soon” tables every minute (separate effect)
+    // 2) Recompute “due soon” tables every minute
     useEffect(() => {
         const computeDueSoon = () => {
             const all = JSON.parse(localStorage.getItem('reservations') || '[]');
@@ -139,10 +132,11 @@ export default function Table() {
             setDueSoonTables(ids);
         };
 
-        computeDueSoon();                       // run once immediately
+        computeDueSoon();
         const t = setInterval(computeDueSoon, 60 * 1000);
         return () => clearInterval(t);
     }, []);
+
     const getUnpaidOrderByTableId = useCallback((tableId) => {
         const all = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
         const index = all.findIndex(o => o.tableId === tableId);
@@ -155,7 +149,7 @@ export default function Table() {
         const { index } = getUnpaidOrderByTableId(tableId);
         if (index < 0) return;
         setQuickPayTableId(null);
-        navigate(`/orderdetail/${index}`);
+        navigate(`/orderdetail/${index}`, { state: { source: 'unpaid' } });
     }, [getUnpaidOrderByTableId, navigate]);
 
     // 更改訂單
@@ -164,7 +158,7 @@ export default function Table() {
         if (!order) return;
         localStorage.setItem('cart', JSON.stringify(order.items));
         setQuickPayTableId(null);
-        navigate(`/TablePage/${order.tableId}`);
+        navigate(`/tablePage/${order.tableId}`);
     }, [getUnpaidOrderByTableId, navigate]);
 
     // 分開付 ─ open modal
@@ -185,18 +179,15 @@ export default function Table() {
         setSplitQtys(q => ({ ...q, [itemId]: val }));
     }, [getUnpaidOrderByTableId]);
 
-    // Confirm split
+    // Confirm split (OrderDetail will subtract items only when payment is confirmed)
     const confirmSplitForTable = useCallback((tableId) => {
-        const { all, index, order } = getUnpaidOrderByTableId(tableId);
+        const { index, order } = getUnpaidOrderByTableId(tableId);
         if (!order) return;
 
         const splitItems = [];
-        const remainItems = [];
         order.items.forEach(it => {
             const s = parseInt(splitQtys[it.id], 10) || 0;
             if (s > 0) splitItems.push({ ...it, qty: s });
-            const r = it.qty - s;
-            if (r > 0) remainItems.push({ ...it, qty: r });
         });
 
         if (splitItems.length === 0) {
@@ -204,28 +195,19 @@ export default function Table() {
             return;
         }
 
-        // Update original order (remainder)
-        all[index] = {
-            ...order,
-            items: remainItems,
-            total: remainItems.reduce((sum, it) => sum + it.price * it.qty, 0),
-        };
-        localStorage.setItem('unpaidOrders', JSON.stringify(all));
-
         setShowSplit(false);
         setQuickPayTableId(null);
 
-        // Go to orderdetail with split info (same as UnpaidTablePage)
+        // Go to orderdetail with split info without modifying localStorage yet
         navigate(`/orderdetail/${index}`, {
             state: {
-                source: 'split',
+                source: 'unpaid',
                 splitItems,
                 guests: order.guests,
                 tableId: order.tableId,
             },
         });
     }, [getUnpaidOrderByTableId, splitQtys, navigate]);
-
 
     // ─── Helpers ──────────────────────────────────────────────────
     const isUnpaid = useCallback(id => unpaidTables.includes(id), [unpaidTables]);
@@ -234,14 +216,9 @@ export default function Table() {
         if (unpaidTables.includes(id)) {
             setQuickPayTableId(id);        // open quick-pay panel
         } else {
-            navigate(`/TablePage/${id}`);  // normal navigation
+            navigate(`/tablePage/${id}`);  // normal navigation
         }
     }, [navigate, unpaidTables]);
-    /*const clearAll = useCallback(() => {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.reload();
-    }, []);*/
 
     const tryClockIn = useCallback(() => {
         if (username !== VALID_USER || password !== VALID_PASS) {
@@ -253,7 +230,7 @@ export default function Table() {
         if (publicIp !== ALLOWED_PUBLIC_IP) {
             return alert(`Clock-in only allowed from office network (your IP: ${publicIp})`);
         }
-        const now = getTaiwanTimestamp();          // <<< Taiwan time
+        const now = getTaiwanTimestamp();
         setClockedInAt(now);
         localStorage.setItem('clockedInAt', now);
     }, [username, password, publicIp]);
@@ -269,7 +246,6 @@ export default function Table() {
         </button>
     );
 
-
     // show summary: total qty, total cash & line-pay
     const showDailySummary = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
@@ -277,7 +253,6 @@ export default function Table() {
             return alert('今日日報尚無紀錄。');
         }
 
-        // 1) Aggregate per-item qty
         const itemTotals = {};
         report.forEach(r => {
             r.items.forEach(i => {
@@ -285,14 +260,12 @@ export default function Table() {
             });
         });
 
-        // 2) Sum cash vs LinePay totals
         let cashSum = 0, lineSum = 0;
         report.forEach(r => {
             if (r.method === 'Cash') cashSum += r.total;
             else if (r.method === 'LinePay') lineSum += r.total;
         });
 
-        // 3) Build message
         const itemsMsg = Object.entries(itemTotals)
             .map(([name, qty]) => `${name} *${qty}`)
             .join('\n');
@@ -313,7 +286,6 @@ export default function Table() {
             return alert('今日日報尚無紀錄，無法下載。');
         }
 
-        // 1) compute summary
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
         report.forEach(r => {
@@ -329,7 +301,6 @@ export default function Table() {
             if (r.total < 0) expenseSum += -r.total;
         });
 
-        // — build CSV
         const BOM = "\uFEFF";
         let csv = BOM;
         csv += '打卡時間\n';
@@ -367,29 +338,27 @@ export default function Table() {
             });
         });
 
-        // — download
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         const firstOrderDate = report.length > 0
             ? report[0].timestamp.split(' ')[0]
-            : getTaiwanDateYYYYMMDD();                 // <<< Taiwan date fallback
+            : getTaiwanDateYYYYMMDD();
         a.download = `${firstOrderDate}.csv`;
         a.click();
         URL.revokeObjectURL(url);
 
         setModalVisible(false);
-        const monthly = localStorage.getItem('monthlyReport');
 
-        // clear everything
-        localStorage.clear();
+        localStorage.removeItem('dailyreport');
+        localStorage.removeItem('clockedInAt');
+        localStorage.removeItem('takeoutOrders');
         sessionStorage.clear();
 
-        // put monthlyReport back
-        if (monthly !== null) {
-            localStorage.setItem('monthlyReport', monthly);
-        }
+        setDailyTotal(0);
+        setClockedInAt(null);
+        setTakeoutCount(0);
     }, []);
 
     const onEndOfDayClick = () => {
@@ -415,8 +384,7 @@ export default function Table() {
             return alert('請輸入正確的項目名稱與金額');
         }
 
-        // build a negative‐total record with Taiwan timestamp
-        const now = getTaiwanTimestamp();            // <<< Taiwan time
+        const now = getTaiwanTimestamp();
         const entry = {
             timestamp: now,
             tableId: '',
@@ -439,9 +407,6 @@ export default function Table() {
         setExpenseModalVisible(false);
         alert(`已記錄支出：${expenseItemName} –${cost}`);
     };
-
-    
-
 
     return (
         <div className="table">
@@ -493,13 +458,18 @@ export default function Table() {
                     </div>
                 </div>
 
+                {/* UPDATED A-BOTTOM-GROUP: Left col (A6, A7), Right col (A3, A4, A5) */}
                 <div className="container3">
                     <div className="a-bottom-group">
-                        {renderBtn('A7', 'shape vrectangle light')}
-                        {renderBtn('A5', 'shape vrectangle light')}
-                        {renderBtn('A6', 'shape circle light')}
-                        {renderBtn('A4', 'shape vrectangle light')}
-                        {renderBtn('A3', 'shape vrectangle light')}
+                        <div className="a-bottom-left">
+                            {renderBtn('A6', 'shape hrectangle light')}
+                            {renderBtn('A7', 'shape hrectangle light')}
+                        </div>
+                        <div className="a-bottom-right">
+                            {renderBtn('A3', 'shape hrectangle light')}
+                            {renderBtn('A4', 'shape hrectangle light')}
+                            {renderBtn('A5', 'shape hrectangle light')}
+                        </div>
                     </div>
                 </div>
             </main>
@@ -592,6 +562,7 @@ export default function Table() {
 
                 <img src={MikoLogo} alt="Miko Logo" className="miko-logo" />
             </aside>
+
             {/* Quick-Pay overlay for unpaid table */}
             {quickPayTableId && (() => {
                 const { order } = getUnpaidOrderByTableId(quickPayTableId);
@@ -617,12 +588,9 @@ export default function Table() {
                             </div>
 
                             <div className="quickpay-body">
-                                {/* ADDED: order items list */}
                                 <ul className="qp-items">
                                     {items.map(it => {
                                         const q = Number(it.qty) || 0;
-                                        
-                                        
                                         return (
                                             <li key={it.id} className="qp-item">
                                                 <div className="qp-item-name">{it.name}</div>
@@ -632,7 +600,6 @@ export default function Table() {
                                     })}
                                 </ul>
 
-                                {/* total */}
                                 <div className="qp-row qp-total"><strong>總共金額：</strong>${total}</div>
                             </div>
 
@@ -642,7 +609,6 @@ export default function Table() {
                                 <button className="qp-split" onClick={() => openSplitForTable(quickPayTableId)}>分開付</button>
                             </div>
 
-                            {/* Split modal inside quick-pay (unchanged) */}
                             {showSplit && (
                                 <div className="split-area">
                                     <h4>分開付</h4>
@@ -682,8 +648,6 @@ export default function Table() {
                     </div>
                 );
             })()}
-
-
 
             {expenseModalVisible && (
                 <div className="modal-overlay">

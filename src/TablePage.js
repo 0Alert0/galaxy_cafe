@@ -1,10 +1,15 @@
-// src/components/TablePage.js
+// src/TablePage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import CustomDrinkModal from './CustomDrinkModal';          // ADDED
-import './CustomDrinkModal.css';                            // ADDED
-import './TablePage.css';
+import CustomDrinkModal from './CustomDrinkModal';
 import ActivityCustomModal from './ActivityCustomModal';
+import {
+  MENU_CATEGORIES,
+  MENU_ITEMS_BY_CATEGORY,
+  CUSTOM_DRINK_CONFIG
+} from './posConfig';
+import './CustomDrinkModal.css';
+import './TablePage.css';
 
 export default function TablePage() {
   const { id } = useParams();
@@ -20,7 +25,7 @@ export default function TablePage() {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
-  // add an item only once per click (for一般品項)
+  // add a standard menu item
   const handleAdd = useCallback(item => {
     setCart(prev => {
       const exists = prev.find(i => i.id === item.id);
@@ -33,13 +38,13 @@ export default function TablePage() {
       } else {
         return [
           ...prev,
-          { id: item.id, name: item.label, price: item.price ?? 0, qty: 1 }
+          { id: item.id, name: item.label, price: Number(item.price) || 0, qty: 1 }
         ];
       }
     });
   }, []);
 
-  // ADDED: add custom drink returned from modal (含 qty/名稱細節/去重合併)
+  // add custom drink or custom activity returned from modal
   const addCustomToCart = useCallback((customItem) => {
     setCart(prev => {
       const idx = prev.findIndex(i => i.id === customItem.id);
@@ -54,7 +59,7 @@ export default function TablePage() {
           name: customItem.name || customItem.label || '客製調酒',
           price,
           qty: qtyToAdd,
-          options: customItem.options // optional, 保留將來需要可用
+          options: customItem.options
         });
       }
       return next;
@@ -63,10 +68,12 @@ export default function TablePage() {
 
   // change quantity manually
   const handleQtyChange = useCallback((itemId, newQty) => {
+    const parsed = Math.max(1, Number(newQty) || 1);
     setCart(prev =>
-      prev.map(i => (i.id === itemId ? { ...i, qty: newQty } : i))
+      prev.map(i => (i.id === itemId ? { ...i, qty: parsed } : i))
     );
   }, []);
+
   const incrementQty = useCallback(itemId => {
     setCart(prev =>
       prev.map(i =>
@@ -92,159 +99,14 @@ export default function TablePage() {
   // compute cart total
   const total = cart.reduce((sum, i) => {
     const q = Number(i.qty) || 0;
-    return sum + (i.price ?? 0) * q;
+    return sum + (Number(i.price) || 0) * q;
   }, 0);
 
-  // your categories & menu data
-  const categories = [
-    '咖啡',
-    '茶 / 果汁 / 無咖啡因飲品',
-    '調酒',
-    '啤酒',
-    '早午餐 / 吐司',
-    '點心 / 炸物',
-    '寄杯卡',
-    '活動'
-  ];
-  const itemsByCategory = {
-    咖啡: [
-      { id: 'coldbrewcoffee', label: '冰滴咖啡', sub: 'Cold brew coffee (每日限量 Limited)', price: 150 },
-      { id: 'americano', label: '美式咖啡', sub: 'Americano', price: 80 },
-      { id: 'espresso', label: '義式咖啡', sub: 'Espresso', price: 80 },
-      { id: 'latte', label: '拿鐵', sub: 'Latte', price: 120 },
-      { id: 'cappuccino', label: '卡布奇諾', sub: 'Cappuccino', price: 150 },
-      { id: 'vanilla-latte', label: '香草拿鐵', sub: 'Vanilla Latte', price: 150 },
-      { id: 'sea-salt-caramel', label: '海鹽焦糖', sub: 'Sea Salt Caramel', price: 150 },
-      { id: 'caramel-macchiato', label: '焦糖瑪奇朵', sub: 'Caramel Macchiato', price: 150 },
-      { id: 'matcha-macchiato', label: '抹茶瑪奇朵', sub: 'Matcha Macchiato', price: 150 },
-      { id: 'matcha-latte', label: '抹茶咖啡', sub: 'Matcha Latte', price: 150 },
-      { id: 'espresso-romano', label: '西西里咖啡', sub: 'Espresso Romano', price: 150 },
-      { id: 'blue-mt-coffee', label: '(手沖) 藍山咖啡', sub: '(Pour Over) Blue Mt. coffee', price: 180 },
-      { id: 'su-xing-coffee', label: '(手沖) 蘇幸咖啡', sub: '(Pour Over) Su Xing coffee', price: 180 },
-      { id: 'coconut-coffee', label: '椰子咖啡', sub: 'coconut coffee', price: 150 },
-      { id: 'pay-cha', label: '焙茶拿鐵', sub: 'Houjicha Latte', price: 180 },
-      
-
-    ],
-    '茶 / 果汁 / 無咖啡因飲品': [
-      { id: 'iced-green-tea', label: '(冰) 綠茶', sub: '(Iced) Green Tea', price: 80 },
-      { id: 'iced-black-tea', label: '(冰) 紅茶', sub: '(Iced) Black Tea', price: 80 },
-      { id: 'iced-oolong-tea', label: '(冰) 烏龍茶', sub: '(Iced) Oolong Tea', price: 80 },
-      { id: 'iced-four-season-tea', label: '(冰) 四季春茶', sub: '(Iced) Four Season Tea', price: 80 },
-      { id: 'hot-green-tea', label: '(熱) 綠茶', sub: '(Hot) Green Tea', price: 80 },
-      { id: 'hot-black-tea', label: '(熱) 紅茶', sub: '(Hot) Black Tea', price: 80 },
-      { id: 'hot-oolong-tea', label: '(熱) 烏龍茶', sub: '(Hot) Oolong Tea', price: 80 },
-      { id: 'hot-four-season-tea', label: '(熱) 四季春茶', sub: '(Hot) Four Season Tea', price: 80 },
-      { id: 'hot-jhinhsuan-tea', label: '(熱) 金萱茶', sub: '(Hot) Jhinhsuan Tea', price: 150 },
-      { id: 'hot-black-honyun-tea', label: '(熱) 韻香紅茶', sub: '(Hot) Black Honyun Tea', price: 150 },
-      { id: 'hot-osmanthus-oolong-tea', label: '(熱) 桂花烏龍', sub: '(Hot) Osmanthus Oolong Tea', price: 150 },
-      { id: 'yuzu-oolong-tea', label: '柚子烏龍', sub: 'Yuzu Oolong Tea', price: 100 },
-      { id: 'peach-oolong-tea', label: '蜜桃烏龍', sub: 'Peach Oolong Tea', price: 100 },
-      { id: 'passion-fruit-green-tea', label: '百香綠茶', sub: 'Passion Fruit Green Tea', price: 100 },
-      { id: 'milk-tea', label: '鮮奶茶', sub: 'Milk Tea', price: 100 },
-      { id: 'fruit-tea', label: '水果茶', sub: 'Fruit Tea', price: 150 },
-      { id: 'Kumquat Lemon', label: '金吉檸檬', sub: 'Kumquat Lemon', price: 100 },
-      { id: 'juice', label: '果汁', sub: 'Juice', price: 80 },
-      { id: 'flavored-sparkling-water', label: '風味氣泡飲', sub: 'Flavored Sparkling Water', price: 100 },
-      { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 },
-      { id: 'coke', label: '可樂', sub: 'Coke', price: 80 },
-      { id: 'sprite', label: '雪碧', sub: 'Sprite', price: 80 },
-
-    ],
-    調酒: [
-      { id: 'pay-cha-cocktail', label: '焙茶拿鐵', sub: 'Houjicha Latte cocktail', price: 350 },
-      { id: 'berry-blend-cocktail', label: '莓果特調', sub: 'berry blend cocktail', price: 350 },
-      { id: 'grasshopper', label: '綠色蚱蜢', sub: 'grasshopper', price: 350 },
-      { id: 'white-russian', label: '白俄羅斯', sub: 'White Russian', price: 350 },
-      { id: 'yogurt-bubble', label: '優格泡泡', sub: 'Yogurt Bubble', price: 350 },
-      { id: 'lemon-cocktail', label: '溫柔鄉', sub: 'Lemon Cocktail', price: 350 },
-      { id: 'mango-tea-wine', label: '芒果茶酒', sub: 'Mango Tea Wine', price: 350 },
-      { id: 'peach-tea-wine', label: '水蜜桃茶酒', sub: 'Peach Tea Wine', price: 350 },
-      { id: 'apple-tea-wine', label: '蘋果茶酒', sub: 'Apple Tea Wine', price: 350 },
-      { id: 'yuzu-tea-wine', label: '柚子茶酒', sub: 'Yuzu Tea Wine', price: 350 },
-      { id: 'cranberry-tea-wine', label: '蔓越莓茶酒', sub: 'Cranberry Tea Wine', price: 350 },
-      { id: 'first-love', label: '(初戀) 草莓奶酒', sub: 'First Love', price: 350 },
-      { id: 'hello-melon', label: '(哈囉，密瓜!) 哈密瓜奶酒', sub: 'Hello, Melon!', price: 350 },
-      { id: 'grape-milk-wine', label: '葡萄奶酒', sub: 'Grape Milk Wine', price: 350 },
-      { id: 'lichi-milk-wine', label: '荔枝奶酒', sub: 'Lichi Milk Wine', price: 350 },
-      { id: 'tipsy-milk-tea', label: '(大人鮮奶茶) 焙茶奶酒', sub: 'Tipsy Milk Tea', price: 350 },
-      { id: 'shot', label: 'Shot', sub: '(買二送一)', price: 100 },
-      { id: 'hawaii', label: '夏威夷', sub: '', price: 350 },
-      { id: 'mango-pomelo', label: '楊枝甘露', sub: '', price: 350 },
-      { id: 'espresso-martini', label: 'Espresso Martini', sub: '', price: 350 },
-      { id: 'whiskey-sour', label: 'Whiskey Sour', sub: '', price: 350 },
-      { id: 'rum-coke', label: 'Rum & Coke', sub: '', price: 300 },
-      { id: 'gin-tonic', label: 'Gin & Tonic', sub: '', price: 300 },
-      { id: 'vodka-coke', label: 'Vodka & Coke', sub: '', price: 300 },
-      { id: 'whisky-soda', label: 'Whisky Soda(highball)', sub: '', price: 300 },
-      { id: 'custom-cocktail', label: '客製化', sub: 'Customize', price: 350, custom: true } // ← 這顆會叫出彈窗
-    ],
-    啤酒: [
-      { id: 'budweiser', label: '百威', sub: 'Budweiser', price: 100 },
-      { id: 'san-miguel', label: '生力', sub: 'San Miguel', price: 130 },
-      { id: 'corona', label: '可樂娜', sub: 'Corona', price: 150 },
-      { id: 'baller-larger', label: '伯樂', sub: 'Baller Larger', price: 250 },
-      { id: 'qianlima-ipa', label: '千里馬', sub: 'Qianlima IPA', price: 250 },
-      { id: 'white-beer', label: '白帥帥', sub: 'White Beer', price: 250 },
-      { id: 'black-beer', label: '黑嚕嚕', sub: 'Black Beer', price: 250 }
-    ],
-    '早午餐 / 吐司': [
-      { id: 'galaxy-brunch', label: '星翼早午餐', sub: 'Galaxy Brunch', price: 250 },
-      { id: 'galaxy-pizza', label: '星翼披薩', sub: 'Galaxy Pizza', price: 150 },
-      { id: 'hot-pressed-sandwich', label: '熱壓吐司 (2份)', sub: 'Hot Pressed Sandwich (2 servings)', price: 150 },
-      { id: 'original-thick-slice', label: '原味厚片', sub: 'Original (附奶油 / Butter)', price: 60 },
-      { id: 'peanuts-thick-slice', label: '花生厚片', sub: 'Peanuts', price: 80 },
-      { id: 'chocolate-thick-slice', label: '巧克力厚片', sub: 'Chocolate', price: 80 },
-      { id: 'milk-crumble-thick-slice', label: '奶酥厚片', sub: 'Milk Crumble', price: 80 },
-      { id: 'garlic-thick-slice', label: '香蒜厚片', sub: 'Garlic', price: 80 },
-      { id: 'matcha-thick-slice', label: '抹茶奶酥厚片', sub: 'Matcha', price: 80 },
-      { id: 'two-flavors-thick-slice', label: '雙拼厚片', sub: '2 Flavors', price: 100 }
-    ],
-    '點心 / 炸物': [
-      { id: 'brownie-cake', label: '布朗尼蛋糕', sub: 'Brownie Cake', price: 130 },
-      { id: 'basque-cheesecake', label: '巴斯克乳酪蛋糕', sub: 'Basque Cheesecake', price: 130 },
-      { id: 'crepe-cake', label: '千層蛋糕', sub: 'Crepe Cake', price: 130 },
-      { id: 'waffle-with-maple-syrup', label: '楓糖鬆餅', sub: 'Waffle with Maple Syrup', price: 160 },
-      { id: 'matcha-waffle', label: '抹茶鬆餅', sub: 'Matcha Waffle', price: 180 },
-      { id: 'choco-waffle', label: '巧克力鬆餅', sub: 'Choco Waffle', price: 180 },
-      { id: 'waffle-with-fruit', label: '水果鬆餅', sub: 'Waffle with Fruit', price: 220 },
-      { id: 'hash-browns', label: '薯餅 (2塊)', sub: 'Hash Browns (2 pcs)', price: 70 },
-      { id: 'french-fries', label: '薯條', sub: 'French Fries', price: 120 }
-    ],
-    '寄杯卡': [
-      { id: '800', label: '寄杯卡 800', sub: '', price: 800 },
-      { id: '1200', label: '寄杯卡 1200', sub: '', price: 1200 },
-      { id: '1400', label: '寄杯卡 1400', sub: '', price: 1400 },
-      { id: '1500', label: '寄杯卡 1500', sub: '', price: 1500 },
-      { id: '3500', label: '寄杯卡 3500', sub: '', price: 3500 }
-    ],
-    活動: [
-      { id: '自訂', label: '自訂金額', sub: '', price: '' },
-      { id: '399', label: '$399', sub: '', price: 399 },
-      { id: '499', label: '$499', sub: '', price: 499 },
-      { id: '599', label: '$599', sub: '', price: 599 },
-      { id: '699', label: '$699', sub: '', price: 699 },
-      { id: '799', label: '$799', sub: '', price: 799 },
-      { id: '899', label: '$899', sub: '', price: 899 },
-      { id: '999', label: '$999', sub: '', price: 999 },
-      { id: '1099', label: '$1099', sub: '', price: 1099 },
-      { id: '1199', label: '$1199', sub: '', price: 1199 },
-      { id: '1299', label: '$1299', sub: '', price: 1299 },
-      { id: '1399', label: '$1399', sub: '', price: 1399 },
-      { id: '1499', label: '$1499', sub: '', price: 1499 },
-      { id: '1599', label: '$1599', sub: '', price: 1599 },
-      { id: '1699', label: '$1699', sub: '', price: 1699 },
-      { id: '1799', label: '$1799', sub: '', price: 1799 },
-      { id: '1899', label: '$1899', sub: '', price: 1899 },
-      { id: '1999', label: '$1999', sub: '', price: 1999 }
-    ]
-  };
-  const [selectedCat, setSelectedCat] = useState(categories[0]);
-  const menuItems = itemsByCategory[selectedCat] ?? [];
+  const [selectedCat, setSelectedCat] = useState(MENU_CATEGORIES[0]);
+  const menuItems = MENU_ITEMS_BY_CATEGORY[selectedCat] ?? [];
 
   // confirm → unpaid vs takeout
   const handleConfirm = useCallback(() => {
-    // guard: require at least one item
     if (cart.length === 0) {
       alert("至少選一個品項");
       return;
@@ -271,24 +133,20 @@ export default function TablePage() {
     setCart([]);
     localStorage.removeItem('cart');
     navigate('/');
-  }, [navigate, setCart]);
+  }, [navigate]);
 
   const handleRemove = useCallback(itemId => {
     setCart(prev => prev.filter(i => i.id !== itemId));
   }, []);
 
-  // ADDED: 控制客製化 Modal 開關
   const [customOpen, setCustomOpen] = useState(false);
-
   const [activityOpen, setActivityOpen] = useState(false);
-
-
 
   return (
     <div className="tablepage">
       <aside className="sidebar">
         <ul className="cat-list">
-          {categories.map(cat => (
+          {MENU_CATEGORIES.map(cat => (
             <li
               key={cat}
               className={cat === selectedCat ? 'active' : undefined}
@@ -314,8 +172,6 @@ export default function TablePage() {
                   setActivityOpen(true);
                   return;
                 }
-
-                // existing behavior
                 if (item.custom && selectedCat === '調酒') {
                   setCustomOpen(true);
                 } else {
@@ -377,7 +233,6 @@ export default function TablePage() {
         </button>
       </aside>
 
-      {/* ADDED: 客製化調酒 Modal */}
       <CustomDrinkModal
         open={customOpen}
         onClose={() => setCustomOpen(false)}
@@ -385,8 +240,9 @@ export default function TablePage() {
           addCustomToCart(item);
           setCustomOpen(false);
         }}
-        defaultPrice={350}  // 你的調酒基礎價
+        defaultPrice={CUSTOM_DRINK_CONFIG.defaultPrice}
       />
+
       <ActivityCustomModal
         open={activityOpen}
         onClose={() => setActivityOpen(false)}
@@ -395,8 +251,6 @@ export default function TablePage() {
           setActivityOpen(false);
         }}
       />
-
-
     </div>
   );
 }

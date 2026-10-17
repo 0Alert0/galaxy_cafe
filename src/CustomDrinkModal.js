@@ -1,5 +1,6 @@
 // src/CustomDrinkModal.js
 import React, { useEffect, useMemo, useState } from 'react';
+import { CUSTOM_DRINK_CONFIG } from './posConfig';
 import './CustomDrinkModal.css';
 
 /**
@@ -9,22 +10,28 @@ import './CustomDrinkModal.css';
  *  - onAdd: (item) => void   // item: { id, name, price, qty, options? }
  *  - defaultPrice?: number
  */
-export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 0 }) {
-    const strengths = ['淡', '正常', '濃'];
-    const tastes = ['偏酸', '偏甜'];
-    const categories = ['茶酒', '奶酒', '果汁', '氣泡飲', '其他'];
-    const mains = [
-        '草莓', '葡萄', '芭樂', '芒果', '百香果', '哈密瓜', '香蕉', '蘋果', '蔓越莓', '柚子', '水蜜桃', '櫻桃','葡萄柚','鳳梨',
-        '焙茶', '檸檬紅茶', '百香綠茶', '柚子烏龍', 
-        '新鮮果汁特調','養樂多','烏梅汁', '雪碧', '可樂', '氣泡水'
-    ];
+export default function CustomDrinkModal({
+    open,
+    onClose,
+    onAdd,
+    defaultPrice = CUSTOM_DRINK_CONFIG.defaultPrice
+}) {
+    const { strengths, tastes, categories, mains } = CUSTOM_DRINK_CONFIG;
 
-    const [strength, setStrength] = useState(strengths[1]); // 正常
-    const [taste, setTaste] = useState(tastes[0]);    // 偏酸
-    const [category, setCategory] = useState(categories[0]);
-    const [main, setMain] = useState(mains[0]);
+    const [strength, setStrength] = useState(strengths[1] || '正常');
+    const [taste, setTaste] = useState(tastes[0] || '偏酸');
+    const [category, setCategory] = useState(categories[0] || '茶酒');
+    const [main, setMain] = useState(mains[0] || '草莓');
     const [qty, setQty] = useState(1);
     const [price, setPrice] = useState(defaultPrice);
+
+    // Reset defaults when modal opens
+    useEffect(() => {
+        if (open) {
+            setPrice(defaultPrice);
+            setQty(1);
+        }
+    }, [open, defaultPrice]);
 
     // Close on ESC
     useEffect(() => {
@@ -34,13 +41,11 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
         return () => window.removeEventListener('keydown', onKey);
     }, [open, onClose]);
 
-    // ✅ include all referenced values in deps
     const id = useMemo(
         () => `custom-drink|酒感=${strength}|口感=${taste}|類別=${category}|主調=${main}`,
         [strength, taste, category, main]
     );
 
-    // ✅ include all referenced values in deps
     const name = useMemo(
         () => `客製調酒（酒感: ${strength}｜口感: ${taste}｜類別: ${category}｜主調: ${main}）`,
         [strength, taste, category, main]
@@ -49,7 +54,7 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
     if (!open) return null;
 
     const clampQty = (n) => Math.max(1, Number.isFinite(+n) ? Math.floor(+n) : 1);
-    const normPrice = (n) => Math.max(0, Number.isFinite(+n) ? +n : defaultPrice);
+    const normPrice = (n) => (n !== '' && Number.isFinite(+n) && +n >= 0) ? +n : defaultPrice;
 
     const handleAdd = () => {
         const item = {
@@ -57,7 +62,7 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
             name,
             price: normPrice(price),
             qty: clampQty(qty),
-            options: { strength, taste, category, main }, // optional, safe to keep
+            options: { strength, taste, category, main },
         };
         onAdd?.(item);
     };
@@ -99,8 +104,15 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
                             {categories.map((c) => (
                                 <button key={c} type="button"
                                     className={`cdm-chip ${category === c ? 'active' : ''}`}
-                                    onClick={() => setCategory(c)}>{c}</button>
-                            ))}
+                                    onClick={() => setCategory(c)}>{t => c}</button>
+                            )).map((_, idx) => {
+                                const c = categories[idx];
+                                return (
+                                    <button key={c} type="button"
+                                        className={`cdm-chip ${category === c ? 'active' : ''}`}
+                                        onClick={() => setCategory(c)}>{c}</button>
+                                );
+                            })}
                         </div>
                     </section>
 
@@ -137,7 +149,7 @@ export default function CustomDrinkModal({ open, onClose, onAdd, defaultPrice = 
                     <div className="cdm-preview">
                         <div className="cdm-preview-title">預覽</div>
                         <div className="cdm-preview-line">{name}</div>
-                        <div className="cdm-preview-line">數量：{clampQty(qty)}　單價：{normPrice(price)}</div>
+                        <div className="cdm-preview-line">數量：{clampQty(qty)} 單價：{normPrice(price)}</div>
                     </div>
                 </div>
 

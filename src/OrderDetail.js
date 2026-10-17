@@ -1,7 +1,22 @@
-// src/components/OrderDetail.js
+// src/OrderDetail.js
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './OrderDetail.css';
+
+// Taiwan Time Helper (UTC+8)
+function getTaiwanTimestamp() {
+    const now = new Date();
+    const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+    const tw = new Date(utcMs + 8 * 60 * 60000);
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const y = tw.getFullYear();
+    const m = pad2(tw.getMonth() + 1);
+    const d = pad2(tw.getDate());
+    const h = pad2(tw.getHours());
+    const mi = pad2(tw.getMinutes());
+    const s = pad2(tw.getSeconds());
+    return `${y}-${m}-${d} ${h}:${mi}:${s}`;
+}
 
 export default function OrderDetail() {
     const { orderIndex } = useParams();
@@ -11,12 +26,11 @@ export default function OrderDetail() {
     // Determine whether we're coming from the takeout list or the unpaid list
     const source = state?.source === 'takeout' ? 'takeout' : 'unpaid';
 
-    // If this view was reached via a "split" action, pull in the splitItems and original index
+    // If this view was reached via a "split" action, pull in the splitItems
     const splitItems = useMemo(
         () => state?.splitItems ?? [],
         [state?.splitItems]
     );
-
 
     // ─── State Hooks ───────────────────────────────────────────────
     const [order, setOrder] = useState(null);
@@ -32,15 +46,18 @@ export default function OrderDetail() {
         const idx = Number(orderIndex);
 
         let loaded;
-        if (splitItems.length > 0) {
-            // If splitItems were passed in state, use those
-            loaded = { ...list[idx], items: splitItems, total: splitItems.reduce((sum, i) => sum + (i.price * i.qty), 0) };
+        if (splitItems.length > 0 && list[idx]) {
+            // If splitItems were passed in state, display only the split items & their subtotal
+            loaded = {
+                ...list[idx],
+                items: splitItems,
+                total: splitItems.reduce((sum, i) => sum + (Number(i.price) || 0) * (Number(i.qty) || 0), 0)
+            };
         } else {
             loaded = list[idx];
         }
 
         if (!loaded) {
-            // If no order found, bounce back
             return navigate(source === 'takeout' ? '/takeout' : '/unpaid');
         }
         setOrder(loaded);
@@ -54,7 +71,7 @@ export default function OrderDetail() {
     const discountNum = Number(discount) || 0;
     const discountedTotal = Math.max(0, total - discountNum);
     const customNum = Number(customAmount);
-    const finalTotal = customAmount !== "" ? customNum : discountedTotal; // else use the computed discounted price
+    const finalTotal = customAmount !== "" ? customNum : discountedTotal;
 
     // ─── Handlers ─────────────────────────────────────────────────
     function goBack() {
@@ -62,76 +79,72 @@ export default function OrderDetail() {
     }
 
     function handleConfirmPayment() {
+        const now = getTaiwanTimestamp();
+        const idx = Number(orderIndex);
 
-        const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
-        const d = new Date();
-        const pad2 = n => String(n).padStart(2, '0');
-        const now =
-            `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ` +
-            `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
-        dailyReport.push({
-            timestamp: now,
-            tableId,                    // ISO string timestamp
-            items: items.map(i => ({          // copy id/name/qty
-                id: i.id,
-                name: i.name,
-                qty: i.qty
-            })),
-            total: finalTotal,                // final total paid
-            method,                           // 'Cash' or 'LinePay'
-            cardNumber,
-            discount: discountNum,
-            customAmount: customNum
-            // if any, else ''
-        });
-        localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
-
-        const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
-        monthly.push({
+        const reportEntry = {
             timestamp: now,
             tableId,
-            items: items.map(i => ({ id: i.id, name: i.name, qty: i.qty })),
+            items: items.map(i => ({
+                id: i.id,
+                name: i.name,
+                qty: Number(i.qty) || 0
+            })),
             total: finalTotal,
             method,
             cardNumber,
             discount: discountNum,
-            customAmount: customNum
-        });
+            customAmount: customAmount !== "" ? customNum : 0
+        };
+
+        const dailyReport = JSON.parse(localStorage.getItem('dailyreport') || '[]');
+        dailyReport.push(reportEntry);
+        localStorage.setItem('dailyreport', JSON.stringify(dailyReport));
+
+        const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+        monthly.push(reportEntry);
         localStorage.setItem('monthlyReport', JSON.stringify(monthly));
 
         if (source === 'unpaid') {
-            // Remove from unpaidOrders
             const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
-            if (splitItems.length > 0) {
-                // We did a split: subtract splitItems from the original order
-                const orig = unpaid[orderIndex];
-                const remaining = orig.items
-                    .map(origIt => {
-                        const splitIt = splitItems.find(s => s.id === origIt.id);
-                        if (!splitIt) return origIt;
-                        const qtyLeft = origIt.qty - splitIt.qty;
-                        return qtyLeft > 0
-                            ? { ...origIt, qty: qtyLeft }
-                            : null;
-                    })
-                    .filter(Boolean);
+            const orig = unpaid[idx];
 
-                // update the original order’s items & total
-                orig.items = remaining;
-                orig.total = remaining.reduce((sum, it) => sum + it.price * it.qty, 0);
-                unpaid[orderIndex] = orig;
-            } else {
-                // Full checkout: remove entire order
-                unpaid.splice(orderIndex, 1);
+            if (orig) {
+                if (splitItems.length > 0) {
+                    // Subtract splitItems from the original order only upon confirmed payment
+                    const remaining = orig.items
+                        .map(origIt => {
+                            const splitIt = splitItems.find(s => s.id === origIt.id);
+                            if (!splitIt) return origIt;
+                            const qtyLeft = (Number(origIt.qty) || 0) - (Number(splitIt.qty) || 0);
+                            return qtyLeft > 0
+                                ? { ...origIt, qty: qtyLeft }
+                                : null;
+                        })
+                        .filter(Boolean);
+
+                    if (remaining.length === 0) {
+                        // All items on the table have now been paid
+                        unpaid.splice(idx, 1);
+                    } else {
+                        orig.items = remaining;
+                        orig.total = remaining.reduce((sum, it) => sum + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+                        unpaid[idx] = orig;
+                    }
+                } else {
+                    // Full checkout: remove entire order
+                    unpaid.splice(idx, 1);
+                }
+                localStorage.setItem('unpaidOrders', JSON.stringify(unpaid));
             }
-
-            localStorage.setItem('unpaidOrders', JSON.stringify(unpaid));
             navigate('/');
         } else {
             // Mark takeout as paid
             const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') || '[]');
-            takeouts[orderIndex].paid = true;
-            localStorage.setItem('takeoutOrders', JSON.stringify(takeouts));
+            if (takeouts[idx]) {
+                takeouts[idx].paid = true;
+                localStorage.setItem('takeoutOrders', JSON.stringify(takeouts));
+            }
             navigate('/');
         }
     }
@@ -140,7 +153,6 @@ export default function OrderDetail() {
         <div className="order-detail">
             <header className="od-header">
                 <h1>桌號: {tableId}</h1>
-
             </header>
 
             <header className="od-header">
@@ -153,7 +165,6 @@ export default function OrderDetail() {
                             onClick={() => setMethod(m)}
                         >
                             {m === 'Cash' ? '現金' : 'Line Pay'}
-
                         </button>
                     ))}
                 </div>
@@ -183,7 +194,7 @@ export default function OrderDetail() {
                             value={discount}
                             onChange={e => setDiscount(e.target.value)}
                             placeholder=""
-                            disabled={customNum > 0}
+                            disabled={customAmount !== "" && customNum >= 0}
                         />
                     </label>
                 </div>

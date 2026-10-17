@@ -1,4 +1,4 @@
-// src/components/UnpaidTablePage.js
+// src/UnpaidTablePage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UnpaidTablePage.css';
@@ -24,11 +24,11 @@ export default function UnpaidTablePage() {
 
     const modifyOrder = useCallback(order => {
         localStorage.setItem('cart', JSON.stringify(order.items));
-        navigate(`/TablePage/${order.tableId}`);
+        navigate(`/tablePage/${order.tableId}`);
     }, [navigate]);
 
     const checkout = useCallback(idx => {
-        navigate(`/orderdetail/${idx}`);
+        navigate(`/orderdetail/${idx}`, { state: { source: 'unpaid' } });
     }, [navigate]);
 
     const goBack = useCallback(() => {
@@ -39,35 +39,30 @@ export default function UnpaidTablePage() {
         setSplitIndex(i);
         // initialize splitQtys to zeros
         const zeroed = {};
-        orders[i].items.forEach(it => zeroed[it.id] = 0);
+        orders[i].items.forEach(it => { zeroed[it.id] = 0; });
         setSplitQtys(zeroed);
     };
 
     // change one split quantity
     const changeSplitQty = (itemId, v) => {
+        const max = orders[splitIndex]?.items.find(it => it.id === itemId)?.qty ?? 0;
+        const val = Math.max(0, Math.min(Number(v) || 0, max));
         setSplitQtys(q => ({
-            ...q, [itemId]: Math.min(v,
-                orders[splitIndex].items.find(it => it.id === itemId).qty
-            )
+            ...q,
+            [itemId]: val
         }));
     };
 
-    // confirm split
+    // confirm split (OrderDetail will subtract items only when payment is confirmed)
     const confirmSplit = () => {
-        const orig = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]');
-        const orderToEdit = orig[splitIndex];
-        const splitItems = [];
-        const remainItems = [];
+        const orderToEdit = orders[splitIndex];
+        if (!orderToEdit) return;
 
-        // build splitItems/remainItems
+        const splitItems = [];
         orderToEdit.items.forEach(it => {
             const s = parseInt(splitQtys[it.id], 10) || 0;
             if (s > 0) {
                 splitItems.push({ ...it, qty: s });
-            }
-            const r = it.qty - s;
-            if (r > 0) {
-                remainItems.push({ ...it, qty: r });
             }
         });
 
@@ -75,26 +70,20 @@ export default function UnpaidTablePage() {
             return alert('至少選擇一項');
         }
 
-        // replace original order's items with remainder
-        orig[splitIndex] = {
-            ...orderToEdit,
-            items: remainItems,
-            total: remainItems.reduce((sum, it) => sum + it.price * it.qty, 0)
-        };
-        setOrders(orig);
-        // clear modal
+        const idx = splitIndex;
         setSplitIndex(null);
 
-        // navigate to detail for the split‑off items
-        navigate(`/orderdetail/${splitIndex}`, {
+        // navigate to detail for the split-off items
+        navigate(`/orderdetail/${idx}`, {
             state: {
-                source: 'split',
+                source: 'unpaid',
                 splitItems,
                 guests: orderToEdit.guests,
                 tableId: orderToEdit.tableId
             }
         });
     };
+
     return (
         <div className="unpaid-page">
             <h1>未付款桌號</h1>
@@ -143,8 +132,9 @@ export default function UnpaidTablePage() {
             >
                 ← 回首頁
             </button>
+
             {/* Split Modal */}
-            {splitIndex !== null && (
+            {splitIndex !== null && orders[splitIndex] && (
                 <div className="modal-overlay">
                     <div className="modal">
                         <h2>{orders[splitIndex].tableId}</h2>
