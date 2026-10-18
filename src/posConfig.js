@@ -6,7 +6,7 @@ export const REMOTE_CONFIG_URL = "";
 export const STORE_SETTINGS = {
   validUser: 'admin',
   validPass: '1234',
-  allowedPublicIp: '68.109.172.254', //68.109.172.254, 119.15.214.56
+  allowedPublicIp: '119.15.214.56', //68.109.172.254, 119.15.214.56
 };
 
 // Add your staff members and their 6-digit PINs here!
