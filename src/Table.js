@@ -53,6 +53,7 @@ export default function Table() {
     const [clockedInStaff, setClockedInStaff] = useState(() => {
         return JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
     });
+    
     const [unpaidTables, setUnpaidTables] = useState([]);
     const [takeoutCount, setTakeoutCount] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
@@ -205,6 +206,7 @@ export default function Table() {
     }, [navigate, unpaidTables]);
 
     // Multiple Staff Clock-In Handler
+    // 上班打卡函數
     const tryClockIn = useCallback(() => {
         const staffObj = STAFF_MEMBERS.find(s => s.name === selectedStaff);
         if (!staffObj || staffObj.pin !== staffPin) {
@@ -217,20 +219,47 @@ export default function Table() {
             return alert(`打卡僅限店內網路 (你的IP: ${publicIp})`);
         }
 
-        // Check if already clocked in today
-        if (clockedInStaff.some(s => s.name === selectedStaff)) {
-            return alert(`${selectedStaff} 今天已經打過卡囉！`);
+        const existing = clockedInStaff.find(s => s.name === selectedStaff);
+        if (existing && existing.clockIn) {
+            return alert(`${selectedStaff} 今天已經打過上班卡了！`);
         }
 
         const now = getTaiwanTimestamp();
-        const newRecord = { name: selectedStaff, time: now };
-        const updatedList = [...clockedInStaff, newRecord];
+        // 濾掉舊的或新增記錄
+        const filtered = clockedInStaff.filter(s => s.name !== selectedStaff);
+        const updatedList = [...filtered, { name: selectedStaff, clockIn: now, clockOut: '' }];
 
         setClockedInStaff(updatedList);
         localStorage.setItem('clockedInStaff', JSON.stringify(updatedList));
         setStaffPin('');
-        alert(`${selectedStaff} 打卡成功！`);
+        alert(`${selectedStaff} 上班打卡成功！`);
     }, [selectedStaff, staffPin, publicIp, clockedInStaff]);
+
+    // 下班打卡函數
+    const tryClockOut = useCallback(() => {
+        const staffObj = STAFF_MEMBERS.find(s => s.name === selectedStaff);
+        if (!staffObj || staffObj.pin !== staffPin) {
+            return alert('密碼錯誤 (請輸入正確的6位數PIN碼)');
+        }
+
+        const existing = clockedInStaff.find(s => s.name === selectedStaff);
+        if (!existing || !existing.clockIn) {
+            return alert(`${selectedStaff} 還沒打過上班卡，無法下班打卡！`);
+        }
+        if (existing.clockOut) {
+            return alert(`${selectedStaff} 今天已經打過下班卡了！`);
+        }
+
+        const now = getTaiwanTimestamp();
+        const updatedList = clockedInStaff.map(s =>
+            s.name === selectedStaff ? { ...s, clockOut: now } : s
+        );
+
+        setClockedInStaff(updatedList);
+        localStorage.setItem('clockedInStaff', JSON.stringify(updatedList));
+        setStaffPin('');
+        alert(`${selectedStaff} 下班打卡成功！`);
+    }, [selectedStaff, staffPin, clockedInStaff]);
 
     const renderBtn = (id, shapeClass = 'shape square light') => (
         <button
@@ -277,7 +306,7 @@ export default function Table() {
     const exportDailyReportCSV = useCallback(() => {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         const staffList = JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
-     
+
 
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
@@ -296,12 +325,12 @@ export default function Table() {
 
         const BOM = "\uFEFF";
         let csv = BOM;
-        
+
         // Add all staff clock-in records at the top of CSV
-        csv += '打卡人員紀錄\n';
+        csv += '打卡人員紀錄 (姓名, 上班時間, 下班時間)\n';
         if (staffList.length > 0) {
             staffList.forEach(s => {
-                csv += `"${s.name}","${s.time}"\n`;
+                csv += `"${s.name}","${s.clockIn || ''}","${s.clockOut || '未打下班卡'}"\n`;
             });
         } else {
             csv += '無打卡紀錄\n';
@@ -366,7 +395,7 @@ export default function Table() {
     }, []);
 
     const onEndOfDayClick = () => {
-      
+
         setModalError('');
         setModalUser('');
         setModalPass('');
@@ -489,18 +518,22 @@ export default function Table() {
 
                 <div className="daily-sales">今日總額: ${dailyTotal}</div>
 
-                {/* Clock-In Panel */}
+                {/* 員工打卡機 Panel */}
                 <div style={{ marginTop: '0.5rem', background: '#eef2f7', padding: '0.5rem', borderRadius: '6px' }}>
                     <div style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>員工打卡機</div>
-                    
+
                     {clockedInStaff.length > 0 && (
-                        <div style={{ fontSize: '0.75rem', marginBottom: '0.4rem', color: '#333' }}>
-                            已打卡: {clockedInStaff.map(s => `${s.name} (${s.time.slice(11, 16)})`).join(', ')}
+                        <div style={{ fontSize: '0.75rem', marginBottom: '0.4rem', color: '#333', textAlign: 'left' }}>
+                            {clockedInStaff.map(s => (
+                                <div key={s.name}>
+                                    <b>{s.name}</b>: 上({s.clockIn ? s.clockIn.slice(11, 16) : '-'}) 下({s.clockOut ? s.clockOut.slice(11, 16) : '未下班'})
+                                </div>
+                            ))}
                         </div>
                     )}
 
                     <form
-                        onSubmit={e => { e.preventDefault(); tryClockIn(); }}
+                        onSubmit={e => { e.preventDefault(); }}
                         style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}
                     >
                         <select
@@ -519,24 +552,44 @@ export default function Table() {
                             placeholder="輸入6位數PIN"
                             value={staffPin}
                             onChange={e => setStaffPin(e.target.value)}
-                            autoComplete="off"
+                            
                             style={{ padding: '0.4rem', fontSize: '0.9rem', borderRadius: '4px', border: '1px solid #ccc' }}
                         />
 
-                        <button
-                            type="submit"
-                            style={{
-                                padding: '0.4rem',
-                                background: '#28a745',
-                                color: '#fff',
-                                fontWeight: 'bold',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            上班打卡
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.3rem' }}>
+                            <button
+                                type="button"
+                                onClick={tryClockIn}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.4rem',
+                                    background: '#28a745',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                上班
+                            </button>
+                            <button
+                                type="button"
+                                onClick={tryClockOut}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.4rem',
+                                    background: '#dc3545',
+                                    color: '#fff',
+                                    fontWeight: 'bold',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                下班
+                            </button>
+                        </div>
                     </form>
                 </div>
 
