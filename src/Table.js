@@ -521,7 +521,8 @@ export default function Table() {
                 {/* 員工打卡機 Panel */}
                 <div style={{ marginTop: '0.5rem', background: '#eef2f7', padding: '0.5rem', borderRadius: '6px' }}>
                     <div style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>員工打卡機</div>
-                    <div style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.25rem' ,color: '#e74c3c' }}>記得下班打卡</div>  
+                    <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' ,color: '#e74c3c' }}>記得下班打卡</div>  
+                    
                     {clockedInStaff.length > 0 && (
                         <div style={{ fontSize: '0.75rem', marginBottom: '0.4rem', color: '#333', textAlign: 'left' }}>
                             {clockedInStaff.map(s => (
@@ -590,6 +591,7 @@ export default function Table() {
                                 下班
                             </button>
                         </div>
+                        <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' ,color: '#e74c3c' }}>記得下班打卡</div>
                     </form>
                 </div>
 
