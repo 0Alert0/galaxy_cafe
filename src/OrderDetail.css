@@ -8,7 +8,7 @@
   --text-muted: #6b7280;
 }
 
-/* Container (size unchanged) */
+/* ─── 容器面板 ───────────────────────────────────────────────────────── */
 .order-detail {
   max-width: 800px;
   margin: 2rem auto;
@@ -18,9 +18,10 @@
   border-radius: 18px;
   box-shadow: var(--shadow-out);
   color: var(--text);
-  font-family: 'Helvetica Neue', Arial, sans-serif;
+  box-sizing: border-box;
 }
 
+/* ─── 標題區 ─────────────────────────────────────────────────────────── */
 .od-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -32,7 +33,7 @@
   font-weight: 700;
 }
 
-/* Payment method pills */
+/* ─── 支付方式切換標籤 (Pills) ────────────────────────────────────────── */
 .od-methods {
   display: inline-flex;
   background: #f2f6f9;
@@ -40,6 +41,7 @@
   padding: 6px;
   box-shadow: var(--shadow-in);
   gap: 6px;
+  margin-top: 0.75rem;
 }
 
 .od-methods button {
@@ -50,8 +52,8 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 1.2rem;
-  /* unchanged */
   color: var(--text-muted);
+  transition: all 0.2s ease;
 }
 
 .od-methods button.selected {
@@ -61,7 +63,7 @@
   box-shadow: 0 8px 20px rgba(47, 175, 109, 0.25);
 }
 
-/* Items list */
+/* ─── 物品清單 ───────────────────────────────────────────────────────── */
 .od-items {
   margin-bottom: 2rem;
 }
@@ -102,17 +104,18 @@
   font-weight: 600;
 }
 
-/* Summary */
+/* ─── 金額與折扣明細 ─────────────────────────────────────────────────── */
 .od-summary {
   margin-bottom: 2rem;
   font-size: 1.1rem;
   line-height: 1.6;
 }
 
-.od-summary>div {
+.od-summary > div {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
 }
 
 .od-summary input {
@@ -123,15 +126,10 @@
   background: #fbfcfe;
   box-shadow: var(--shadow-in);
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
-.discount-input,
-.custom-input,
-.card-input {
-  margin-top: 1rem;
-}
-
-/* Footer */
+/* ─── 底部操作按鈕 ───────────────────────────────────────────────────── */
 .od-footer {
   display: flex;
   justify-content: space-between;
@@ -146,6 +144,7 @@
   font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .od-footer .back {

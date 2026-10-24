@@ -12,15 +12,14 @@
   --dur: 200ms;
 }
 
-/* Overall */
+/* ─── 整體佈局 ───────────────────────────────────────────────────────── */
 .tablepage {
   display: flex;
   height: 97vh;
   background: var(--bg-light);
-  font-family: 'Segoe UI', sans-serif;
 }
 
-/* Sidebar */
+/* ─── 左側分類清單 (Sidebar) ─────────────────────────────────────────── */
 .sidebar {
   width: 240px;
   padding: 1rem;
@@ -30,11 +29,13 @@
   overflow-y: auto;
 }
 
-.sidebar::-webkit-scrollbar {
+.sidebar::-webkit-scrollbar,
+.main::-webkit-scrollbar {
   width: 6px;
 }
 
-.sidebar::-webkit-scrollbar-thumb {
+.sidebar::-webkit-scrollbar-thumb,
+.main::-webkit-scrollbar-thumb {
   background: var(--panel-border);
   border-radius: 3px;
 }
@@ -63,27 +64,11 @@
   border-color: #cfe8db;
 }
 
-/* Main */
+/* ─── 中間品項區 (Main & Grid) ───────────────────────────────────────── */
 .main {
   flex: 1;
   padding: 1.5rem 2rem;
   overflow-y: auto;
-  position: relative;
-}
-
-.main::-webkit-scrollbar {
-  width: 6px;
-}
-
-.main::-webkit-scrollbar-thumb {
-  background: var(--panel-border);
-  border-radius: 3px;
-}
-
-.table-label {
-  font-size: 4rem;
-  font-weight: 700;
-  color: var(--text-dark);
 }
 
 .category-title h2 {
@@ -92,14 +77,12 @@
   color: var(--text-dark);
 }
 
-/* Grid */
 .items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
 }
 
-/* Item buttons (same size) */
 .item-btn {
   background: linear-gradient(180deg, #ffffff, #f3f6fb);
   border: 1px solid var(--panel-border);
@@ -133,7 +116,7 @@
   background: linear-gradient(180deg, #fff2f3, #ffe9ea);
 }
 
-/* Cart (same width) */
+/* ─── 右側購物車清單 (Cart) ───────────────────────────────────────────── */
 .cart {
   width: 300px;
   padding: 1rem;
@@ -144,29 +127,67 @@
   flex-direction: column;
 }
 
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.table-label {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
 .cart h3 {
   margin: 0 0 1rem;
   color: var(--danger);
 }
 
-.cart ul {
+.cart-list {
   list-style: none;
   margin: 0 0 1rem;
   padding: 0;
 }
 
-.cart li {
+.cart-list li {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.75rem;
   color: var(--danger);
 }
 
-.cart li:hover {
+.cart-list li:hover {
   background: rgba(192, 57, 43, 0.06);
   border-radius: 6px;
   padding: 0.25rem;
+}
+
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.qty-controls button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #d7dbe3;
+  background: #f5f7fb;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qty-controls button:hover {
+  background: #eaf0fb;
+}
+
+.qty-input {
+  width: 3rem;
+  text-align: center;
 }
 
 .cart-total {
@@ -194,66 +215,6 @@
   transform: translateY(-2px);
 }
 
-/* Header, inputs */
-.table-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.party-size label {
-  font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.party-size input {
-  width: 3rem;
-  padding: 0.25rem;
-  font-size: 1rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 8px;
-  background: #fbfcfe;
-}
-
-.party-size input:focus {
-  border-color: #cfe8db;
-  outline: none;
-}
-
-/* Qty controls */
-.cart-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.qty-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.qty-controls button {
-  width: 24px;
-  height: 24px;
-  border: 1px solid #d7dbe3;
-  background: #f5f7fb;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.qty-controls button:hover {
-  background: #eaf0fb;
-}
-
-.qty-input {
-  width: 3rem;
-  text-align: center;
-}
-
 .back-to-top {
   background: #fff;
   border: 1px solid var(--panel-border);
@@ -272,7 +233,7 @@
   transform: translateY(-2px);
 }
 
-/* Responsive */
+/* ─── 響應式佈局 ─────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .tablepage {
     flex-direction: column;
@@ -286,23 +247,4 @@
   .main {
     padding: 1rem;
   }
-}
-
-/* Modal visuals (sizes unchanged) */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
 }

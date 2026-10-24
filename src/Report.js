@@ -23,11 +23,11 @@ function getTaiwanDateYYYYMMDD() {
   const d = String(tw.getDate()).padStart(2, '0');
   return `${y}-${m}-${d}`;
 }
+
 /** Convert Taiwan-local YYYY-MM-DD + HH:mm to a UTC instant (ms) */
 function taiwanEpochMs(dateStr, timeStr) {
   const [Y, M, D] = dateStr.split('-').map(Number);
   const [h, m] = timeStr.split(':').map(Number);
-  // Represent that Taiwan local time as UTC by subtracting 8 hours.
   return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
 }
 
@@ -97,7 +97,7 @@ export default function Reports() {
     csv += `LinePay總額,${lineSum}\n`;
     csv += `月支出,${expenseSum}\n`;
 
-    // 4) download (filename uses Taiwan date)
+    // 4) download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -106,10 +106,9 @@ export default function Reports() {
     a.click();
     URL.revokeObjectURL(url);
 
-    // ───────────────────────────────────────────────────────────────
-    // Preserve future reservations (based on TAIWAN time)
+    // Preserve future reservations
     const reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    const nowMs = Date.now(); // current UTC instant
+    const nowMs = Date.now();
     const futureReservations = reservations.filter(r => {
       if (!r?.date || !r?.time) return false;
       const t = taiwanEpochMs(
@@ -119,11 +118,9 @@ export default function Reports() {
       return t > nowMs && r.status !== 'Cancelled';
     });
 
-    // clear storage
     localStorage.clear();
     sessionStorage.clear();
 
-    // restore only the future reservations
     if (futureReservations.length) {
       localStorage.setItem('reservations', JSON.stringify(futureReservations));
     }
@@ -167,8 +164,8 @@ export default function Reports() {
         </ResponsiveContainer>
       </div>
 
-      <footer className="to-footer">
-        <button className="to-back" onClick={() => navigate('/')}>
+      <footer className="reports-footer">
+        <button className="reports-back-btn" onClick={() => navigate('/')}>
           ← 回首頁
         </button>
       </footer>

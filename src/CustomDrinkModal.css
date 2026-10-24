@@ -39,7 +39,6 @@
     cursor: pointer;
 }
 
-
 .cdm-body {
     padding: 16px 20px;
     display: grid;
@@ -65,7 +64,6 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-
 .cdm-chip {
     padding: 8px 12px;
     border-radius: 999px;
@@ -88,11 +86,17 @@
     border-color: #fff;
 }
 
-
 .cdm-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+}
+
+/* 抽離自 JS 的數量按鈕排版 */
+.cdm-qty-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .cdm-input {
@@ -102,6 +106,7 @@
     border: 1px solid #2b2b2b;
     background: #151515;
     color: #e6e6e6;
+    box-sizing: border-box;
 }
 
 .cdm-hint {
@@ -109,7 +114,6 @@
     font-size: 12px;
     color: #8a8a8a;
 }
-
 
 .cdm-preview {
     margin-top: 4px;
@@ -130,7 +134,6 @@
     color: #ddd;
     line-height: 1.6;
 }
-
 
 .cdm-footer {
     display: flex;

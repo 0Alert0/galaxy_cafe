@@ -6,17 +6,15 @@
   --shadow-sm: 0 1px 2px rgba(18, 21, 26, 0.06), 0 2px 8px rgba(18, 21, 26, 0.05);
   --shadow-lg: 0 10px 28px rgba(18, 21, 26, 0.12);
   --accent: #2faf6d;
-  --warn: #e16357;
   --text-dark: #333;
   --text-muted: #6b7280;
 }
 
-/* Page & grid (unchanged sizes) */
+/* ─── 頁面整體與網格佈局 ─────────────────────────────────────────────── */
 .unpaid-page {
   max-width: 800px;
   margin: 2rem auto;
   padding: 2rem 1rem;
-  font-family: 'Segoe UI', sans-serif;
   text-align: center;
   background: var(--bg-light);
 }
@@ -28,7 +26,7 @@
   margin-bottom: 2rem;
 }
 
-/* Card */
+/* ─── 訂單卡片 ───────────────────────────────────────────────────────── */
 .order-card {
   position: relative;
   background: var(--panel-bg);
@@ -37,6 +35,7 @@
   padding: 1.5rem 1rem;
   text-align: left;
   box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .order-card:hover {
@@ -56,7 +55,7 @@
   color: var(--text-muted);
 }
 
-/* Info button */
+/* ─── 詳細資訊按鈕 (i) ───────────────────────────────────────────────── */
 .info-btn {
   position: absolute;
   top: 1rem;
@@ -71,7 +70,7 @@
   cursor: pointer;
 }
 
-/* Buttons */
+/* ─── 按鈕共通樣式 ───────────────────────────────────────────────────── */
 .order-card button,
 .back-btn {
   border: 1px solid var(--border-light);
@@ -80,6 +79,7 @@
   cursor: pointer;
   font-size: 0.9rem;
   font-weight: 700;
+  transition: background 0.2s ease;
 }
 
 .view-btn {
@@ -103,25 +103,25 @@
   background: #e6edf7;
 }
 
-.split-btn {
+.card-split-btn {
   background: #fff0ef;
   color: #7a2c26;
   border-color: #ffd5d1;
   margin-left: 0.5rem;
+  white-space: nowrap;
 }
 
-.split-btn:hover {
+.card-split-btn:hover {
   background: #ffe7e5;
 }
-
-/* Empty text */
+/* ─── 空狀態 ─────────────────────────────────────────────────────────── */
 .none {
   color: var(--text-muted);
   font-style: italic;
   margin-bottom: 2rem;
 }
 
-/* Back */
+/* ─── 回首頁按鈕 ─────────────────────────────────────────────────────── */
 .back-btn {
   background: #ffffff;
   color: var(--text-dark);
@@ -133,7 +133,7 @@
   background: #f6faff;
 }
 
-/* Modal */
+/* ─── 分開付 Modal 彈窗 ───────────────────────────────────────────────── */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -173,6 +173,14 @@
   border: 1px solid var(--border-light);
   border-radius: 8px;
   background: #fbfcfe;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.split-qty-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .modal-actions {
@@ -188,14 +196,9 @@
   color: var(--text-dark);
   border-radius: 10px;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .modal-actions button:hover {
   background: #eaf7ef;
-}
-
-.split-qty-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }

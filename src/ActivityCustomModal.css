@@ -19,6 +19,7 @@
   width: 420px;
   max-width: 92vw;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .activity-modal-root .activity-modal__title {
@@ -42,10 +43,17 @@
 }
 
 .activity-modal-root .activity-modal__input {
+  width: 100%;
   padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #ddd;
   outline: none;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.activity-modal-root .activity-modal__input:focus {
+  border-color: #2faf6d;
 }
 
 .activity-modal-root .activity-modal__actions {
@@ -61,10 +69,20 @@
   border: 1px solid #ddd;
   background: #fff;
   cursor: pointer;
+  font-weight: 500;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.activity-modal-root .activity-modal__btn:hover {
+  background: #f5f5f5;
 }
 
 .activity-modal-root .activity-modal__btn--primary {
   border-color: transparent;
   background: #111;
   color: #fff;
+}
+
+.activity-modal-root .activity-modal__btn--primary:hover {
+  background: #333;
 }

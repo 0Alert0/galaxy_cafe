@@ -8,20 +8,19 @@
   --warn: #e74c3c;
 }
 
-/* Table.css */
+/* ─── 容器與整體佈局 ─────────────────────────────────────────────────── */
 .table {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
   gap: 2rem;
   background: var(--bg);
+  min-height: 100vh;
 }
 
 .main {
   flex: 1;
-  align-items: center;
   overflow-y: auto;
-  justify-content: center;
   height: 92vh;
 }
 
@@ -68,12 +67,12 @@
   margin-top: 2rem;
 }
 
-.a-top-group>button:first-child {
+.a-top-group > button:first-child {
   margin-right: 6rem;
 }
 
-.a-top-group>button:nth-child(2),
-.a-top-group>button:nth-child(3) {
+.a-top-group > button:nth-child(2),
+.a-top-group > button:nth-child(3) {
   margin-left: 0.7rem;
 }
 
@@ -115,10 +114,10 @@
   display: flex;
   flex-direction: row;
   gap: 1rem;
-  margin-left: calc(50px);
+  margin-left: 50px;
 }
 
-/* ─── SHAPES ───────────────────────────────────────────────────────────── */
+/* ─── 桌位按鈕形狀 (SHAPES) ────────────────────────────────────────────── */
 .shape {
   position: relative;
   display: flex;
@@ -134,21 +133,10 @@
 }
 
 @keyframes bounce-down {
-  0% {
-    transform: translateY(-3px);
-  }
-
-  30% {
-    transform: translateY(8px);
-  }
-
-  60% {
-    transform: translateY(4px);
-  }
-
-  100% {
-    transform: translateY(8px);
-  }
+  0% { transform: translateY(-3px); }
+  30% { transform: translateY(8px); }
+  60% { transform: translateY(4px); }
+  100% { transform: translateY(8px); }
 }
 
 .shape:active {
@@ -181,7 +169,7 @@
   background-color: #e0e0e0;
 }
 
-/* ─── Unpaid Indicator ─────────────────────────────────────────────────── */
+/* ─── 未付款狀態指示 ──────────────────────────────────────────────────── */
 .shape.unpaid {
   background-color: var(--warn) !important;
   border-color: var(--warn) !important;
@@ -191,19 +179,27 @@
 .shape.unpaid::after {
   content: '未付';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: top;
-  justify-content: right;
-  font-size: 0.45rem;
+  top: 4px;
+  right: 6px;
+  font-size: 0.65rem;
   font-weight: bold;
   pointer-events: none;
 }
 
-/* ─── Sidebar ─────────────────────────────────────────────────────────── */
+/* ─── 即將到達之訂位指示 ──────────────────────────────────────────────── */
+.shape.due-soon {
+  border-color: #ffad33 !important;
+  box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.35), 0 6px 14px var(--shadow-light);
+  background: linear-gradient(180deg, rgba(255, 237, 200, 0.65), rgba(255, 255, 255, 0.8));
+  animation: dueSoonPulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes dueSoonPulse {
+  from { box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.25), 0 6px 14px var(--shadow-light); }
+  to   { box-shadow: 0 0 0 5px rgba(255, 173, 51, 0.45), 0 8px 18px var(--shadow-strong); }
+}
+
+/* ─── 右側邊欄 ────────────────────────────────────────────────────────── */
 .right-sidebar {
   width: 200px;
   padding: 1rem;
@@ -214,6 +210,7 @@
   flex-direction: column;
   gap: 0.75rem;
   overflow-y: auto;
+  max-height: 100vh;
 }
 
 .right-sidebar button {
@@ -241,7 +238,6 @@
   padding: 2px 6px;
   border-radius: 999px;
   margin-left: 0.5rem;
-  transform: translateX(4px);
 }
 
 .daily-sales {
@@ -251,108 +247,12 @@
   margin-top: 1rem;
 }
 
-/* ─── Modal Overlay & Login ──────────────────────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+
+
+.show-summary-button {
+  font-size: 0.9rem;
 }
 
-.login-modal {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  padding: 2rem;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 600px;
-  box-shadow: 0 6px 16px var(--shadow-light);
-  text-align: center;
-}
-
-.login-modal h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.login-modal input {
-  width: 100%;
-  padding: 0.5rem;
-  margin-bottom: 0.75rem;
-  border: 1px solid var(--panel-border);
-  border-radius: 4px;
-}
-
-.modal-error {
-  color: var(--warn);
-  margin-bottom: 0.75rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.modal-actions button {
-  flex: 1;
-  padding: 0.5rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  background: var(--accent);
-  color: #fff;
-  transition: background 0.2s;
-}
-
-.modal-actions button:hover {
-  background: #248a3f;
-}
-
-.modal-actions button:first-child {
-  background: #ccc;
-  color: #333;
-}
-
-.modal-actions button:first-child:hover {
-  background: #bbb;
-}
-
-/* ── Tablet / Large Screen Overrides ──────────────────────────────────── */
-@media (min-width: 1024px) {
-  .right-sidebar {
-    width: 280px;
-    height: 940px;
-    padding: 1.5rem;
-  }
-
-  .right-sidebar button {
-    padding: 1.25rem 1.5rem;
-    font-size: 1.25rem;
-    line-height: 1.2;
-  }
-}
-
-/* 支出 button style (optional) */
-.expense-button {
-  background: #f8d7da;
-  color: #721c24;
-  font-weight: bold;
-}
-
-.expense-button:hover {
-  background: #f5c6cb;
-}
-
-/* Logo in sidebar */
 .miko-logo {
   margin-top: 5rem;
   max-width: 200px;
@@ -360,6 +260,78 @@
   align-self: center;
 }
 
+/* ─── 員工打卡機面板 ─────────────────────────────────────────────────── */
+.clockin-panel {
+  margin-top: 0.5rem;
+  background: #eef2f7;
+  padding: 0.5rem;
+  border-radius: 6px;
+}
+
+.clockin-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.clockin-status-list {
+  font-size: 0.75rem;
+  margin-bottom: 0.4rem;
+  color: #333;
+  text-align: left;
+}
+
+.clockin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.clockin-select,
+.clockin-input {
+  padding: 0.4rem;
+  font-size: 0.9rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.clockin-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.clockin-btn-in,
+.clockin-btn-out {
+  flex: 1;
+  padding: 0.4rem !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center !important;
+}
+
+.clockin-btn-in {
+  background: #28a745 !important;
+}
+
+.clockin-btn-out {
+  background: #dc3545 !important;
+}
+
+.clockin-alert-text {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+  color: #e74c3c;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* ─── 左側訂位提醒面板 ───────────────────────────────────────────────── */
 .left-rsv {
   width: 250px;
   min-width: 250px;
@@ -369,6 +341,7 @@
   border-radius: 12px;
   box-shadow: 0 6px 14px var(--shadow-light);
   align-self: flex-start;
+  height: fit-content; /* 避免被右側打卡機高度拉長 */
 }
 
 .left-rsv h4 {
@@ -377,30 +350,44 @@
   font-size: 1.2rem;
 }
 
+/* 移除預設的黑點與內縮 */
+.left-rsv ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .left-rsv li {
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem 1rem;
   background: #fff;
   border: 1px solid var(--panel-border);
   border-radius: 8px;
-  font-size: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
+/* 時間與桌號左右水平對齊 */
 .rsv-main {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
 }
 
 .left-rsv .time {
   font-variant-numeric: tabular-nums;
-  opacity: 0.85;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.left-rsv .table {
+/* 防止未指定被折成直排 */
+.rsv-table-name {
   font-weight: bold;
-  font-size: 1.5rem;
-  display: inline;
+  font-size: 1.3rem;
+  color: var(--accent);
+  white-space: nowrap; /* 強制橫排顯示 */
 }
 
 .rsv-notes {
@@ -410,19 +397,25 @@
   word-break: break-word;
 }
 
-/* Reservation starting within 30 minutes */
-.shape.due-soon {
-  border-color: #ffad33 !important;
-  box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.35), 0 6px 14px var(--shadow-light);
-  background: linear-gradient(180deg, rgba(255, 237, 200, 0.65), rgba(255, 255, 255, 0.8));
-  animation: dueSoonPulse 1.2s ease-in-out infinite alternate;
+.rsv-guest-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  color: #333;
 }
 
-@keyframes dueSoonPulse {
-  from { box-shadow: 0 0 0 3px rgba(255, 173, 51, 0.25), 0 6px 14px var(--shadow-light); }
-  to   { box-shadow: 0 0 0 5px rgba(255, 173, 51, 0.45), 0 8px 18px var(--shadow-strong); }
+.rsv-name {
+  font-weight: 600;
 }
 
+.rsv-party-size {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ─── 快速結帳面板 (Quick-Pay) ───────────────────────────────────────── */
 .quickpay-card {
   background: var(--panel-bg);
   border: 1px solid var(--panel-border);
@@ -478,11 +471,10 @@
   cursor: pointer;
 }
 
-.qp-pay  { background: #dff0d8; color: #1e5631; }
-.qp-edit { background: #e7eef7; color: #183a57; }
-.qp-split{ background: #fae3db; color: #7a2e1c; }
+.qp-pay   { background: #dff0d8; color: #1e5631; }
+.qp-edit  { background: #e7eef7; color: #183a57; }
+.qp-split { background: #fae3db; color: #7a2e1c; }
 
-/* Quick-Pay items list */
 .qp-items {
   list-style: none;
   margin: 8px 0 12px;
@@ -490,6 +482,7 @@
   max-height: 240px;
   overflow: auto;
 }
+
 .qp-item {
   display: flex;
   justify-content: space-between;
@@ -497,9 +490,170 @@
   padding: 6px 0;
   border-bottom: 1px dashed #e5e7eb;
 }
-.qp-item:last-child { border-bottom: 0; }
 
-.qp-item-name { font-weight: 500; }
-.qp-item-meta { font-variant-numeric: tabular-nums; color: #555; }
+.qp-item:last-child {
+  border-bottom: 0;
+}
 
-.qp-total { margin-top: 6px; font-weight: 700; }
+.qp-item-name {
+  font-weight: 500;
+}
+
+.qp-item-meta {
+  font-variant-numeric: tabular-nums;
+  color: #555;
+}
+
+.qp-total {
+  margin-top: 6px;
+  font-weight: 700;
+}
+
+/* ─── 分開付區域樣式 ─────────────────────────────────────────────────── */
+.split-area {
+  margin-top: 1rem;
+  border-top: 1px solid #ddd;
+  padding-top: 0.75rem;
+}
+
+.split-area h4 {
+  margin: 0 0 0.5rem 0;
+}
+
+.split-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.split-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.split-qty-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.split-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ccc;
+  background: #f7f7f7;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.split-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.split-qty-group input {
+  width: 44px;
+  text-align: center;
+  padding: 0.2rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.split-area .modal-actions {
+  margin-top: 0.75rem;
+}
+
+/* ─── 通用 Modal 彈窗樣式 ────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.login-modal {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  padding: 2rem;
+  border-radius: 8px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 6px 16px var(--shadow-light);
+  text-align: center;
+}
+
+.login-modal h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.login-modal input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modal-error {
+  color: var(--warn);
+  margin-bottom: 0.75rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.modal-actions button:hover {
+  background: #248a3f;
+}
+
+.modal-actions button:first-child {
+  background: #ccc;
+  color: #333;
+}
+
+.modal-actions button:first-child:hover {
+  background: #bbb;
+}
+
+/* ─── 平板與大螢幕適配 ───────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .right-sidebar {
+    width: 280px;
+    padding: 1.5rem;
+  }
+
+  .right-sidebar button {
+    padding: 1.25rem 1.5rem;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+}

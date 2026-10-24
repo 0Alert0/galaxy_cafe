@@ -78,7 +78,7 @@ export const MENU_ITEMS_BY_CATEGORY = {
     { id: 'passion-fruit-green-tea', label: '百香綠茶', sub: 'Passion Fruit Green Tea', price: 100 },
     { id: 'milk-tea', label: '鮮奶茶', sub: 'Milk Tea', price: 100 },
     { id: 'fruit-tea', label: '水果茶', sub: 'Fruit Tea', price: 150 },
-    { id: 'Kumquat Lemon', label: '金吉檸檬', sub: 'Kumquat Lemon', price: 100 },
+    { id: 'Kumquat-Lemon', label: '金吉檸檬', sub: 'Kumquat Lemon', price: 100 },
     { id: 'juice', label: '果汁', sub: 'Juice', price: 80 },
     { id: 'flavored-sparkling-water', label: '風味氣泡飲', sub: 'Flavored Sparkling Water', price: 100 },
     { id: 'seasonal-fresh-juice', label: '季節新鮮果汁', sub: 'Seasonal Fresh Juice', price: 150 },

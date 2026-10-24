@@ -53,7 +53,7 @@ export default function Table() {
     const [clockedInStaff, setClockedInStaff] = useState(() => {
         return JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
     });
-    
+
     const [unpaidTables, setUnpaidTables] = useState([]);
     const [takeoutCount, setTakeoutCount] = useState(0);
     const [modalVisible, setModalVisible] = useState(false);
@@ -205,8 +205,7 @@ export default function Table() {
         }
     }, [navigate, unpaidTables]);
 
-    // Multiple Staff Clock-In Handler
-    // 上班打卡函數
+    // ─── 上班打卡 ─────────────────────────────────────────────────
     const tryClockIn = useCallback(() => {
         const staffObj = STAFF_MEMBERS.find(s => s.name === selectedStaff);
         if (!staffObj || staffObj.pin !== staffPin) {
@@ -225,7 +224,6 @@ export default function Table() {
         }
 
         const now = getTaiwanTimestamp();
-        // 濾掉舊的或新增記錄
         const filtered = clockedInStaff.filter(s => s.name !== selectedStaff);
         const updatedList = [...filtered, { name: selectedStaff, clockIn: now, clockOut: '' }];
 
@@ -235,7 +233,7 @@ export default function Table() {
         alert(`${selectedStaff} 上班打卡成功！`);
     }, [selectedStaff, staffPin, publicIp, clockedInStaff]);
 
-    // 下班打卡函數
+    // ─── 下班打卡 ─────────────────────────────────────────────────
     const tryClockOut = useCallback(() => {
         const staffObj = STAFF_MEMBERS.find(s => s.name === selectedStaff);
         if (!staffObj || staffObj.pin !== staffPin) {
@@ -307,7 +305,6 @@ export default function Table() {
         const report = JSON.parse(localStorage.getItem('dailyreport') || '[]');
         const staffList = JSON.parse(localStorage.getItem('clockedInStaff') || '[]');
 
-
         const itemTotals = {};
         let cashSum = 0, lineSum = 0;
         report.forEach(r => {
@@ -326,7 +323,6 @@ export default function Table() {
         const BOM = "\uFEFF";
         let csv = BOM;
 
-        // Add all staff clock-in records at the top of CSV
         csv += '打卡人員紀錄 (姓名, 上班時間, 下班時間)\n';
         if (staffList.length > 0) {
             staffList.forEach(s => {
@@ -383,7 +379,6 @@ export default function Table() {
 
         setModalVisible(false);
 
-        // Clear daily shift data
         localStorage.removeItem('dailyreport');
         localStorage.removeItem('clockedInStaff');
         localStorage.removeItem('takeoutOrders');
@@ -395,7 +390,19 @@ export default function Table() {
     }, []);
 
     const onEndOfDayClick = () => {
+        // 1. 檢查是否有未付款內用桌
+        if (unpaidTables.length > 0) {
+            return alert(`尚有未付款桌號（${unpaidTables.join(', ')}），請完成結帳後再進行結單！`);
+        }
 
+        // 2. （可選）檢查是否有未付款外帶單
+        const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') || '[]');
+        const hasUnpaidTakeout = takeouts.some(o => !o.paid);
+        if (hasUnpaidTakeout) {
+            return alert('尚有外帶訂單尚未付款，請完成結帳後再進行結單！');
+        }
+
+        // 全部付清才開啟管理員結單彈窗
         setModalError('');
         setModalUser('');
         setModalPass('');
@@ -448,7 +455,12 @@ export default function Table() {
                             <li key={r.id}>
                                 <div className="rsv-main">
                                     <span className="time">{r.time}</span>
-                                    <span className="table">{r.tableId || '未指定'}</span>
+                                    <span className="rsv-table-name">{r.tableId || '未指定'}</span>
+                                </div>
+                                {/* 新增：訂位姓名與人數 */}
+                                <div className="rsv-guest-info">
+                                    <span className="rsv-name">{r.name}</span>
+                                    <span className="rsv-party-size">({r.partySize}人)</span>
                                 </div>
                                 {r.notes && r.notes.trim() !== '' && (
                                     <div className="rsv-notes">{r.notes}</div>
@@ -519,12 +531,13 @@ export default function Table() {
                 <div className="daily-sales">今日總額: ${dailyTotal}</div>
 
                 {/* 員工打卡機 Panel */}
-                <div style={{ marginTop: '0.5rem', background: '#eef2f7', padding: '0.5rem', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>員工打卡機</div>
-                    <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' ,color: '#e74c3c' }}>記得下班打卡</div>  
-                    
+                <div className="clockin-panel">
+                    <div className="clockin-title">員工打卡機</div>
+                    <div className="clockin-alert-text">下班打卡</div>
+                    <div className="clockin-alert-text">下班打卡</div>
+
                     {clockedInStaff.length > 0 && (
-                        <div style={{ fontSize: '0.75rem', marginBottom: '0.4rem', color: '#333', textAlign: 'left' }}>
+                        <div className="clockin-status-list">
                             {clockedInStaff.map(s => (
                                 <div key={s.name}>
                                     <b>{s.name}</b>: 上({s.clockIn ? s.clockIn.slice(11, 16) : '-'}) 下({s.clockOut ? s.clockOut.slice(11, 16) : '未下班'})
@@ -535,12 +548,12 @@ export default function Table() {
 
                     <form
                         onSubmit={e => { e.preventDefault(); }}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}
+                        className="clockin-form"
                     >
                         <select
                             value={selectedStaff}
                             onChange={e => setSelectedStaff(e.target.value)}
-                            style={{ padding: '0.4rem', fontSize: '0.9rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                            className="clockin-select"
                         >
                             {STAFF_MEMBERS.map(s => (
                                 <option key={s.name} value={s.name}>{s.name}</option>
@@ -553,52 +566,34 @@ export default function Table() {
                             placeholder="輸入6位數PIN"
                             value={staffPin}
                             onChange={e => setStaffPin(e.target.value)}
-                            
-                            style={{ padding: '0.4rem', fontSize: '0.9rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                            className="clockin-input"
                         />
 
-                        <div style={{ display: 'flex', gap: '0.3rem' }}>
+                        <div className="clockin-actions">
                             <button
                                 type="button"
                                 onClick={tryClockIn}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.4rem',
-                                    background: '#28a745',
-                                    color: '#fff',
-                                    fontWeight: 'bold',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                                className="clockin-btn-in"
                             >
                                 上班
                             </button>
                             <button
                                 type="button"
                                 onClick={tryClockOut}
-                                style={{
-                                    flex: 1,
-                                    padding: '0.4rem',
-                                    background: '#dc3545',
-                                    color: '#fff',
-                                    fontWeight: 'bold',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                                className="clockin-btn-out"
                             >
                                 下班
                             </button>
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' ,color: '#e74c3c' }}>記得下班打卡</div>
+
+                        <div className="clockin-alert-text">下班打卡</div>
+                        <div className="clockin-alert-text">下班打卡</div>
                     </form>
                 </div>
 
                 <button
                     className="expense-button"
                     onClick={openExpenseModal}
-                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
                     支出
                 </button>
@@ -606,21 +601,18 @@ export default function Table() {
                 <button
                     className="show-summary-button"
                     onClick={showDailySummary}
-                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem', fontSize: '0.9rem' }}
                 >
                     今日日報
                 </button>
                 <button
                     className="export-csv-button"
                     onClick={onEndOfDayClick}
-                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
                     結單
                 </button>
                 <button
                     className="analysis"
                     onClick={goReports}
-                    style={{ marginTop: '0.5rem', padding: '0.5rem 1rem' }}
                 >
                     月報
                 </button>
@@ -702,7 +694,7 @@ export default function Table() {
                                             </li>
                                         ))}
                                     </ul>
-                                    <div className="modal-actions" style={{ marginTop: '.5rem' }}>
+                                    <div className="modal-actions">
                                         <button onClick={() => setShowSplit(false)}>取消</button>
                                         <button onClick={() => confirmSplitForTable(quickPayTableId)}>確認分開付</button>
                                     </div>

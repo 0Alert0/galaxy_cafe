@@ -101,7 +101,7 @@ export default function UnpaidTablePage() {
                             </button>
 
                             <h2>{o.tableId}</h2>
-                            <p><strong>人數:</strong> {o.guests}</p>
+                           
                             <p><strong>總共金額:</strong> ${o.total}</p>
 
                             <button
@@ -116,7 +116,7 @@ export default function UnpaidTablePage() {
                             >
                                 更改訂單
                             </button>
-                            <button className="split-btn" onClick={() => openSplit(i)}>
+                            <button className="card-split-btn" onClick={() => openSplit(i)}>
                                 分開付
                             </button>
                         </div>

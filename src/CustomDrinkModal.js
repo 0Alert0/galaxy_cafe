@@ -104,15 +104,8 @@ export default function CustomDrinkModal({
                             {categories.map((c) => (
                                 <button key={c} type="button"
                                     className={`cdm-chip ${category === c ? 'active' : ''}`}
-                                    onClick={() => setCategory(c)}>{t => c}</button>
-                            )).map((_, idx) => {
-                                const c = categories[idx];
-                                return (
-                                    <button key={c} type="button"
-                                        className={`cdm-chip ${category === c ? 'active' : ''}`}
-                                        onClick={() => setCategory(c)}>{c}</button>
-                                );
-                            })}
+                                    onClick={() => setCategory(c)}>{c}</button>
+                            ))}
                         </div>
                     </section>
 
@@ -130,7 +123,7 @@ export default function CustomDrinkModal({
                     <section className="cdm-row">
                         <div>
                             <label className="cdm-label" htmlFor="cdm-qty">數量</label>
-                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <div className="cdm-qty-controls">
                                 <button type="button" className="cdm-chip" onClick={() => setQty((q) => clampQty(q - 1))}>−</button>
                                 <input id="cdm-qty" type="number" min={1} value={qty}
                                     onChange={(e) => setQty(clampQty(e.target.value))} className="cdm-input" />

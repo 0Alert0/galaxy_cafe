@@ -29,16 +29,13 @@ function taiwanEpochMs(dateStr, timeStr) {
   return Date.UTC(Y, M - 1, D, (h ?? 0) - 8, m ?? 0, 0, 0);
 }
 
-
 /** Pretty date like 2025/08/12（二） — correct weekday */
 function formatDisplayDate(dateStr) {
   const [Y, M, D] = dateStr.split('-').map(Number);
-  // Use UTC midnight for that calendar date; no timezone shift.
   const d = new Date(Date.UTC(Y, M - 1, D, 0, 0, 0, 0));
   const wd = '日一二三四五六'[d.getUTCDay()];
   return `${Y}/${String(M).padStart(2, '0')}/${String(D).padStart(2, '0')}（${wd}）`;
 }
-
 
 export default function ReservationsPage() {
   const navigate = useNavigate();
@@ -55,7 +52,7 @@ export default function ReservationsPage() {
     phone: '',
     partySize: 1,
     tableId: '',
-    date: getTaiwanDateYYYYMMDD(), // default to today (Taiwan)
+    date: getTaiwanDateYYYYMMDD(),
     time: '09:00',
     notes: '',
   });
@@ -135,7 +132,7 @@ export default function ReservationsPage() {
       date: form.date,
       time: form.time,
       notes: form.notes || '',
-      status: 'Booked', // Booked | Seated | Completed | No-show | Cancelled
+      status: 'Booked',
       createdAt: new Date().toISOString(),
     };
 
@@ -193,7 +190,6 @@ export default function ReservationsPage() {
                 <li
                   key={r.id}
                   className={`rsv-card status-${r.status.toLowerCase()}`}
-                  style={{ position: 'relative' }}
                 >
                   {/* small X close button */}
                   <button
@@ -201,17 +197,6 @@ export default function ReservationsPage() {
                     onClick={() => handleRemoveReservation(r.id)}
                     aria-label="移除訂位"
                     title="移除訂位"
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 10,
-                      background: 'transparent',
-                      border: 'none',
-                      fontSize: '1.1rem',
-                      lineHeight: 1,
-                      cursor: 'pointer',
-                      color: '#999',
-                    }}
                   >
                     ×
                   </button>
@@ -277,7 +262,7 @@ export default function ReservationsPage() {
               />
 
               {/* 5-minute time selectors */}
-              <div className="time-5-selects" style={{ display: 'flex', gap: '0.5rem' }}>
+              <div className="time-5-selects">
                 <select
                   value={splitTime(form.time).hh}
                   onChange={(e) => {
