@@ -534,7 +534,7 @@ export default function Table() {
                 <div className="clockin-panel">
                     <div className="clockin-title">員工打卡機</div>
                     <div className="clockin-alert-text">下班打卡</div>
-                    <div className="clockin-alert-text">下班打卡</div>
+                    
 
                     {clockedInStaff.length > 0 && (
                         <div className="clockin-status-list">
@@ -587,7 +587,7 @@ export default function Table() {
                         </div>
 
                         <div className="clockin-alert-text">下班打卡</div>
-                        <div className="clockin-alert-text">下班打卡</div>
+                       
                     </form>
                 </div>
 
