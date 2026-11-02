@@ -533,7 +533,7 @@ export default function Table() {
                 {/* 員工打卡機 Panel */}
                 <div className="clockin-panel">
                     <div className="clockin-title">員工打卡機</div>
-                    <div className="clockin-alert-text">下班打卡</div>
+                    {/*<div className="clockin-alert-text">下班打卡</div>*/}
                     
 
                     {clockedInStaff.length > 0 && (
@@ -586,7 +586,7 @@ export default function Table() {
                             </button>
                         </div>
 
-                        <div className="clockin-alert-text">下班打卡</div>
+                        
                        
                     </form>
                 </div>
