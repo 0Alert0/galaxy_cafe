@@ -474,6 +474,7 @@
 .qp-pay   { background: #dff0d8; color: #1e5631; }
 .qp-edit  { background: #e7eef7; color: #183a57; }
 .qp-split { background: #fae3db; color: #7a2e1c; }
+.qp-move  { background: #ede9fe; color: #4c1d95; }
 
 .qp-items {
   list-style: none;

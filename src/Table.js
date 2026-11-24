@@ -5,6 +5,13 @@ import { STORE_SETTINGS, STAFF_MEMBERS } from './posConfig';
 import './Table.css';
 import MikoLogo from './Miko.PNG';
 
+// 放在 Table.js 頂部（import 下方）
+const ALL_TABLES = [
+    'A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7',
+    'B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12',
+    'C1', 'C2', 'C3', 'C4', 'C5'
+];
+
 // ─── Taiwan time helpers ─────────────────────────────────────────
 function getTaiwanDateYYYYMMDD() {
     const now = new Date();
@@ -69,6 +76,58 @@ export default function Table() {
     const [quickPayTableId, setQuickPayTableId] = useState(null);
     const [showSplit, setShowSplit] = useState(false);
     const [splitQtys, setSplitQtys] = useState({});
+
+    // ─── 換桌相關 State ────────────────────────────────────────────
+    const [showMove, setShowMove] = useState(false);
+    const [targetTable, setTargetTable] = useState('');
+
+    // 取得目前可換入的空桌清單
+    const availableTables = ALL_TABLES.filter(t => !unpaidTables.includes(t));
+
+    const openMoveForTable = useCallback(() => {
+        const emptyTables = ALL_TABLES.filter(t => !unpaidTables.includes(t));
+        if (emptyTables.length === 0) {
+            return alert('目前沒有空桌可以更換！');
+        }
+        setShowSplit(false); // 若原本有開分開付則先收合
+        setTargetTable(emptyTables[0]);
+        setShowMove(true);
+    }, [unpaidTables]);
+
+    const confirmMoveTable = useCallback((fromTableId) => {
+        if (!targetTable) return alert('請選擇目標桌號');
+
+        // 防呆：若目標桌位 30 分鐘內有訂位，先提醒店員
+        if (dueSoonTables.has(targetTable)) {
+            const ok = window.confirm(`提醒：${targetTable} 桌在 30 分鐘內有訂位，確定要換過去嗎？`);
+            if (!ok) return;
+        }
+
+        // 1. 更新 localStorage 的 unpaidOrders
+        const allOrders = JSON.parse(localStorage.getItem('unpaidOrders') || '[]');
+        const updatedOrders = allOrders.map(o =>
+            o.tableId === fromTableId ? { ...o, tableId: targetTable } : o
+        );
+        localStorage.setItem('unpaidOrders', JSON.stringify(updatedOrders));
+
+        // 2. 更新畫面上的未付款紅底狀態
+        setUnpaidTables(updatedOrders.map(o => o.tableId));
+
+        // 3. 同步更新今日已帶位 (Seated) 的訂位桌號（若有）
+        const today = getTaiwanDateYYYYMMDD();
+        const allRsvs = JSON.parse(localStorage.getItem('reservations') || '[]');
+        const updatedRsvs = allRsvs.map(r =>
+            r.date === today && r.status === 'Seated' && r.tableId === fromTableId
+                ? { ...r, tableId: targetTable }
+                : r
+        );
+        localStorage.setItem('reservations', JSON.stringify(updatedRsvs));
+
+        // 4. 重置並關閉彈窗
+        setShowMove(false);
+        setQuickPayTableId(null);
+        alert(`已將 ${fromTableId} 換至 ${targetTable}`);
+    }, [targetTable, dueSoonTables]);
 
     // ─── Init (sales total, IP, unpaid tables) ─────────────────────
     useEffect(() => {
@@ -200,6 +259,8 @@ export default function Table() {
     const handleClick = useCallback((id) => {
         if (unpaidTables.includes(id)) {
             setQuickPayTableId(id);
+            setShowMove(false);   
+            setShowSplit(false);  
         } else {
             navigate(`/tablePage/${id}`);
         }
@@ -534,7 +595,7 @@ export default function Table() {
                 <div className="clockin-panel">
                     <div className="clockin-title">員工打卡機</div>
                     {/*<div className="clockin-alert-text">下班打卡</div>*/}
-                    
+
 
                     {clockedInStaff.length > 0 && (
                         <div className="clockin-status-list">
@@ -586,8 +647,8 @@ export default function Table() {
                             </button>
                         </div>
 
-                        
-                       
+
+
                     </form>
                 </div>
 
@@ -631,13 +692,13 @@ export default function Table() {
                 );
 
                 return (
-                    <div className="modal-overlay" onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}>
+                    <div className="modal-overlay" onClick={() => { setQuickPayTableId(null); setShowSplit(false); setShowMove(false); }}>
                         <div className="quickpay-card" onClick={(e) => e.stopPropagation()}>
                             <div className="quickpay-header">
                                 <h3>{quickPayTableId}</h3>
                                 <button
                                     className="qp-close"
-                                    onClick={() => { setQuickPayTableId(null); setShowSplit(false); }}
+                                    onClick={() => { setQuickPayTableId(null); setShowSplit(false); ; setShowMove(false); }}
                                 >
                                     ✕
                                 </button>
@@ -662,8 +723,33 @@ export default function Table() {
                             <div className="quickpay-actions">
                                 <button className="qp-pay" onClick={() => checkoutForTable(quickPayTableId)}>付款</button>
                                 <button className="qp-edit" onClick={() => modifyOrderForTable(quickPayTableId)}>更改訂單</button>
-                                <button className="qp-split" onClick={() => openSplitForTable(quickPayTableId)}>分開付</button>
+                                <button className="qp-split" onClick={() =>{setShowMove(false); openSplitForTable(quickPayTableId);}}>分開付</button>
+                                <button className="qp-move" onClick={openMoveForTable}>換桌</button>
                             </div>
+
+                            {showMove && (
+                                <div className="split-area">
+                                    <h4>更換桌位（{quickPayTableId} → 選擇空桌）</h4>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', margin: '0.75rem 0' }}>
+                                        <select
+                                            className="clockin-select"
+                                            style={{ fontSize: '1.1rem', padding: '0.5rem' }}
+                                            value={targetTable}
+                                            onChange={(e) => setTargetTable(e.target.value)}
+                                        >
+                                            {availableTables.map(t => (
+                                                <option key={t} value={t}>
+                                                    {t}{dueSoonTables.has(t) ? ' (即將有訂位)' : ''}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="modal-actions">
+                                        <button onClick={() => setShowMove(false)}>取消</button>
+                                        <button onClick={() => confirmMoveTable(quickPayTableId)}>確認換桌</button>
+                                    </div>
+                                </div>
+                            )}
 
                             {showSplit && (
                                 <div className="split-area">
