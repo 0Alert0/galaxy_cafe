@@ -691,3 +691,132 @@
     line-height: 1.2;
   }
 }
+
+/* ─── 今日日報彈窗 (Daily Summary Modal) ─────────────────────────────── */
+.summary-modal {
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  width: 780px;
+  max-width: 95vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 12px 28px var(--shadow-strong);
+  box-sizing: border-box;
+}
+
+.summary-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.summary-modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.summary-totals-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.summary-stat {
+  background: #f4f8f6;
+  border: 1px solid #d5e8de;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.summary-stat span {
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.summary-stat strong {
+  font-size: 1.25rem;
+  color: #145c35;
+}
+
+.summary-stat.expense {
+  background: #fdf3f2;
+  border-color: #f5d5d2;
+}
+
+.summary-stat.expense strong {
+  color: #c0392b;
+}
+
+.summary-section {
+  margin-bottom: 1rem;
+}
+
+.summary-section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.summary-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-height: 90px;
+  overflow-y: auto;
+}
+
+.summary-tag {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.85rem;
+}
+
+.summary-table-wrap {
+  max-height: 290px;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.summary-table th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  padding: 0.55rem 0.65rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.summary-table td {
+  padding: 0.5rem 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: top;
+}
+
+.summary-table td small {
+  color: #6b7280;
+  font-size: 0.78rem;
+}
+
+.summary-table tr.is-expense td {
+  color: #c0392b;
+  background: #fffafa;
+}

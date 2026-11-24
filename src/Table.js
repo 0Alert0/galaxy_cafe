@@ -74,6 +74,14 @@ export default function Table() {
     const [expenseModalVisible, setExpenseModalVisible] = useState(false);
     const [expenseItemName, setExpenseItemName] = useState('');
     const [expenseAmount, setExpenseAmount] = useState('');
+    const [summaryModalVisible, setSummaryModalVisible] = useState(false);
+    const [summaryData, setSummaryData] = useState({
+        items: [],
+        cashSum: 0,
+        lineSum: 0,
+        expenseSum: 0,
+        records: [],
+    });
     const [todayReservations, setTodayReservations] = useState(0);
     const [todayRsvs, setTodayRsvs] = useState([]);
     const [dueSoonTables, setDueSoonTables] = useState(new Set());
@@ -341,29 +349,31 @@ export default function Table() {
         }
 
         const itemTotals = {};
+        let cashSum = 0;
+        let lineSum = 0;
+        let expenseSum = 0;
+
         report.forEach(r => {
-            r.items.forEach(i => {
-                itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
-            });
+            if (r.method === 'Expense' || r.total < 0) {
+                expenseSum += Math.abs(Number(r.total) || 0);
+            } else {
+                if (r.method === 'Cash') cashSum += Number(r.total) || 0;
+                else if (r.method === 'LinePay') lineSum += Number(r.total) || 0;
+
+                (r.items || []).forEach(i => {
+                    itemTotals[i.name] = (itemTotals[i.name] || 0) + Number(i.qty);
+                });
+            }
         });
 
-        let cashSum = 0, lineSum = 0;
-        report.forEach(r => {
-            if (r.method === 'Cash') cashSum += r.total;
-            else if (r.method === 'LinePay') lineSum += r.total;
+        setSummaryData({
+            items: Object.entries(itemTotals),
+            cashSum,
+            lineSum,
+            expenseSum,
+            records: report,
         });
-
-        const itemsMsg = Object.entries(itemTotals)
-            .map(([name, qty]) => `${name} *${qty}`)
-            .join('\n');
-
-        const msg =
-            `今日日報\n\n` +
-            `項目總數量:\n${itemsMsg}\n\n` +
-            `現金總額: $${cashSum}\n` +
-            `LinePay 總額: $${lineSum}`;
-
-        alert(msg);
+        setSummaryModalVisible(true);
     }, []);
 
     const exportDailyReportCSV = useCallback(() => {
@@ -832,6 +842,97 @@ export default function Table() {
                         <div className="modal-actions">
                             <button onClick={() => setExpenseModalVisible(false)}>取消</button>
                             <button onClick={handleConfirmExpense}>確認</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {summaryModalVisible && (
+                <div className="modal-overlay" onClick={() => setSummaryModalVisible(false)}>
+                    <div className="summary-modal" onClick={e => e.stopPropagation()}>
+                        <div className="summary-modal-header">
+                            <h2>今日日報</h2>
+                            <button className="qp-close" onClick={() => setSummaryModalVisible(false)}>✕</button>
+                        </div>
+
+                        <div className="summary-totals-grid">
+                            <div className="summary-stat">
+                                <span>現金總額</span>
+                                <strong>${summaryData.cashSum}</strong>
+                            </div>
+                            <div className="summary-stat">
+                                <span>LinePay 總額</span>
+                                <strong>${summaryData.lineSum}</strong>
+                            </div>
+                            <div className="summary-stat expense">
+                                <span>今日支出</span>
+                                <strong>-${summaryData.expenseSum}</strong>
+                            </div>
+                        </div>
+
+                        <div className="summary-section">
+                            <h4>項目總數量</h4>
+                            <div className="summary-item-tags">
+                                {summaryData.items.map(([name, qty]) => (
+                                    <span key={name} className="summary-tag">
+                                        {name} <b>*{qty}</b>
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="summary-section">
+                            <h4>交易明細</h4>
+                            <div className="summary-table-wrap">
+                                <table className="summary-table">
+                                    <thead>
+                                        <tr>
+                                            <th>桌號/時間</th>
+                                            <th>品項 (itemName)</th>
+                                            <th>數量 (qty)</th>
+                                            <th>折扣</th>
+                                            <th>寄杯卡號</th>
+                                            <th>客製化金額</th>
+                                            <th>實收/付款</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {summaryData.records.map((r, rIdx) => {
+                                            const items = r.items || [];
+                                            const isExpense = r.method === 'Expense' || r.total < 0;
+                                            return items.map((it, iIdx) => (
+                                                <tr key={`${rIdx}-${iIdx}`} className={isExpense ? 'is-expense' : ''}>
+                                                    <td>
+                                                        {iIdx === 0 ? (
+                                                            <>
+                                                                <div><b>{isExpense ? '支出' : (r.tableId || '-')}</b></div>
+                                                                <small>{r.timestamp?.slice(11, 16) || ''}</small>
+                                                            </>
+                                                        ) : ''}
+                                                    </td>
+                                                    <td>{it.name}</td>
+                                                    <td>{it.qty}</td>
+                                                    <td>{iIdx === 0 && !isExpense ? `$${Number(r.discount) || 0}` : ''}</td>
+                                                    <td>{iIdx === 0 && !isExpense ? (r.cardNumber || '-') : ''}</td>
+                                                    <td>{iIdx === 0 && !isExpense ? `$${Number(r.customAmount) || 0}` : ''}</td>
+                                                    <td>
+                                                        {iIdx === 0 ? (
+                                                            <>
+                                                                <div><b>{r.total < 0 ? `-$${Math.abs(r.total)}` : `$${r.total}`}</b></div>
+                                                                <small>{r.method}</small>
+                                                            </>
+                                                        ) : ''}
+                                                    </td>
+                                                </tr>
+                                            ));
+                                        })}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div className="modal-actions">
+                            <button onClick={() => setSummaryModalVisible(false)}>關閉</button>
                         </div>
                     </div>
                 </div>
