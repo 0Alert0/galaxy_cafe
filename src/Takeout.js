@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './takeout.css';
 
@@ -23,7 +23,15 @@ export default function TakeoutPage() {
         localStorage.setItem('takeoutOrders', JSON.stringify(saved));
         setOrders(saved);
     };
-    
+
+
+    const handleModifyOrder = (i) => {
+        const target = orders[i];
+        if (!target) return;
+        localStorage.setItem('cart', JSON.stringify(target.items));
+        localStorage.setItem('editingTakeoutIndex', String(i));
+        navigate('/tablePage/Take Out');
+    };
 
     return (
         <div className="takeout-page">
@@ -63,7 +71,16 @@ export default function TakeoutPage() {
                                 >
                                     {o.paid ? '已付款' : 'Checkout'}
                                 </button>
-                              
+
+                                {!o.paid && (
+                                    <button
+                                        className="to-modify"
+                                        onClick={() => handleModifyOrder(i)}
+                                    >
+                                        更改訂單
+                                    </button>
+                                )}
+
                                 {o.paid && (
                                     <button
                                         className="to-close"

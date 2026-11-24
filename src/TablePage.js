@@ -115,8 +115,17 @@ export default function TablePage() {
     const newOrder = { tableId: id, items: cart, total };
     if (id === 'Take Out') {
       const takeouts = JSON.parse(localStorage.getItem('takeoutOrders') ?? '[]');
-      takeouts.push(newOrder);
+      const editIdxRaw = localStorage.getItem('editingTakeoutIndex');
+      const editIdx = editIdxRaw !== null ? Number(editIdxRaw) : -1;
+
+      if (editIdx >= 0 && takeouts[editIdx]) {
+        takeouts[editIdx] = { ...takeouts[editIdx], ...newOrder };
+      } else {
+        takeouts.push(newOrder);
+      }
+
       localStorage.setItem('takeoutOrders', JSON.stringify(takeouts));
+      localStorage.removeItem('editingTakeoutIndex');
       navigate('/takeout');
     } else {
       const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]');
@@ -132,6 +141,7 @@ export default function TablePage() {
   const goBack = useCallback(() => {
     setCart([]);
     localStorage.removeItem('cart');
+    localStorage.removeItem('editingTakeoutIndex');
     navigate('/');
   }, [navigate]);
 

@@ -119,6 +119,22 @@
   cursor: not-allowed;
 }
 
+.to-modify {
+  flex: 1;
+  background: #eef2f7;
+  border: 1px solid #dbe2ed;
+  color: #1f2937;
+  padding: 0.6rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.to-modify:hover {
+  background: #e6edf7;
+}
+
 .to-close {
   background: #ffecec;
   border: 1px solid #ffd5d1;
