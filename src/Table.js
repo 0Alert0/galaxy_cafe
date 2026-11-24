@@ -12,6 +12,10 @@ const ALL_TABLES = [
     'C1', 'C2', 'C3', 'C4', 'C5'
 ];
 
+const ROUND_CN = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
+function formatRoundLabel(num) {
+    return num >= 1 && num <= 10 ? `第${ROUND_CN[num]}次訂單` : `第${num}次訂單`;
+}
 // ─── Taiwan time helpers ─────────────────────────────────────────
 function getTaiwanDateYYYYMMDD() {
     const now = new Date();
@@ -259,8 +263,8 @@ export default function Table() {
     const handleClick = useCallback((id) => {
         if (unpaidTables.includes(id)) {
             setQuickPayTableId(id);
-            setShowMove(false);   
-            setShowSplit(false);  
+            setShowMove(false);
+            setShowSplit(false);
         } else {
             navigate(`/tablePage/${id}`);
         }
@@ -698,24 +702,42 @@ export default function Table() {
                                 <h3>{quickPayTableId}</h3>
                                 <button
                                     className="qp-close"
-                                    onClick={() => { setQuickPayTableId(null); setShowSplit(false); ; setShowMove(false); }}
+                                    onClick={() => { setQuickPayTableId(null); setShowSplit(false);; setShowMove(false); }}
                                 >
                                     ✕
                                 </button>
                             </div>
 
                             <div className="quickpay-body">
-                                <ul className="qp-items">
-                                    {items.map(it => {
-                                        const q = Number(it.qty) || 0;
-                                        return (
-                                            <li key={it.id} className="qp-item">
-                                                <div className="qp-item-name">{it.name}</div>
-                                                <div className="qp-item-meta">x{q}</div>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
+                                {(() => {
+                                    const rounds =
+                                        Array.isArray(order.rounds) && order.rounds.length > 0
+                                            ? order.rounds
+                                            : [{ round: 1, items }];
+
+                                    return (
+                                        <div className="qp-rounds-container">
+                                            {rounds.map((r, rIdx) => (
+                                                <div key={r.round ?? rIdx} className="qp-round-group">
+                                                    <div className="qp-round-title">
+                                                        {formatRoundLabel(r.round || rIdx + 1)}
+                                                    </div>
+                                                    <ul className="qp-items">
+                                                        {(r.items || []).map(it => {
+                                                            const q = Number(it.qty) || 0;
+                                                            return (
+                                                                <li key={`${r.round}-${it.id}`} className="qp-item">
+                                                                    <div className="qp-item-name">{it.name}</div>
+                                                                    <div className="qp-item-meta">x{q}</div>
+                                                                </li>
+                                                            );
+                                                        })}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
 
                                 <div className="qp-row qp-total"><strong>總共金額：</strong>${total}</div>
                             </div>
@@ -723,7 +745,7 @@ export default function Table() {
                             <div className="quickpay-actions">
                                 <button className="qp-pay" onClick={() => checkoutForTable(quickPayTableId)}>付款</button>
                                 <button className="qp-edit" onClick={() => modifyOrderForTable(quickPayTableId)}>更改訂單</button>
-                                <button className="qp-split" onClick={() =>{setShowMove(false); openSplitForTable(quickPayTableId);}}>分開付</button>
+                                <button className="qp-split" onClick={() => { setShowMove(false); openSplitForTable(quickPayTableId); }}>分開付</button>
                                 <button className="qp-move" onClick={openMoveForTable}>換桌</button>
                             </div>
 

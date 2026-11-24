@@ -11,6 +11,94 @@ import {
 import './CustomDrinkModal.css';
 import './TablePage.css';
 
+// ===== 新增：計算第一次、第二次訂單批次 =====
+function buildUpdatedRounds(existingOrder, newCart) {
+  // 1. 全新訂單 -> 第一次訂單
+  if (!existingOrder) {
+    return [
+      {
+        round: 1,
+        items: newCart.map((it) => ({ ...it, qty: Number(it.qty) || 0 })),
+      },
+    ];
+  }
+
+  // 取得既有批次（相容舊資料）
+  const prevRounds =
+    Array.isArray(existingOrder.rounds) && existingOrder.rounds.length > 0
+      ? existingOrder.rounds.map((r) => ({
+          round: r.round,
+          items: r.items.map((it) => ({ ...it, qty: Number(it.qty) || 0 })),
+        }))
+      : [
+          {
+            round: 1,
+            items: (existingOrder.items || []).map((it) => ({
+              ...it,
+              qty: Number(it.qty) || 0,
+            })),
+          },
+        ];
+
+  const oldMap = new Map();
+  (existingOrder.items || []).forEach((it) => {
+    oldMap.set(it.id, (oldMap.get(it.id) || 0) + (Number(it.qty) || 0));
+  });
+
+  const newMap = new Map();
+  newCart.forEach((it) => {
+    newMap.set(it.id, (newMap.get(it.id) || 0) + (Number(it.qty) || 0));
+  });
+
+  // 2. 處理被減少或刪除的品項（從最新一筆往回扣，避免動到已出餐的舊單）
+  oldMap.forEach((oldQty, itemId) => {
+    const newQty = newMap.get(itemId) || 0;
+    let toRemove = oldQty - newQty;
+    if (toRemove > 0) {
+      for (let i = prevRounds.length - 1; i >= 0 && toRemove > 0; i--) {
+        const target = prevRounds[i].items.find((it) => it.id === itemId);
+        if (target) {
+          const deduct = Math.min(target.qty, toRemove);
+          target.qty -= deduct;
+          toRemove -= deduct;
+        }
+      }
+    }
+  });
+
+  // 清除數量為 0 的品項與空批次
+  const cleanedRounds = prevRounds
+    .map((r) => ({
+      ...r,
+      items: r.items.filter((it) => it.qty > 0),
+    }))
+    .filter((r) => r.items.length > 0);
+
+  // 3. 找出這次「新增」或「增加數量」的品項 -> 成為下一次訂單
+  const addedItems = [];
+  newCart.forEach((it) => {
+    const newQty = Number(it.qty) || 0;
+    const oldQty = oldMap.get(it.id) || 0;
+    const diff = newQty - oldQty;
+    if (diff > 0) {
+      addedItems.push({ ...it, qty: diff });
+    }
+  });
+
+  if (addedItems.length > 0) {
+    const nextRoundNum =
+      cleanedRounds.length > 0
+        ? cleanedRounds[cleanedRounds.length - 1].round + 1
+        : 1;
+    cleanedRounds.push({
+      round: nextRoundNum,
+      items: addedItems,
+    });
+  }
+
+  return cleanedRounds;
+}
+
 export default function TablePage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -129,8 +217,11 @@ export default function TablePage() {
       navigate('/takeout');
     } else {
       const unpaid = JSON.parse(localStorage.getItem('unpaidOrders') ?? '[]');
+      const existingOrder = unpaid.find(o => o.tableId === id);
+      const rounds = buildUpdatedRounds(existingOrder, cart);
+
       const updated = unpaid.filter(o => o.tableId !== id);
-      updated.push(newOrder);
+      updated.push({ ...newOrder, rounds });
       localStorage.setItem('unpaidOrders', JSON.stringify(updated));
       navigate('/unpaid');
     }

@@ -126,9 +126,34 @@ export default function OrderDetail() {
                     if (remaining.length === 0) {
                         // All items on the table have now been paid
                         unpaid.splice(idx, 1);
-                    } else {
+                   } else {
                         orig.items = remaining;
                         orig.total = remaining.reduce((sum, it) => sum + (Number(it.price) || 0) * (Number(it.qty) || 0), 0);
+
+                        // 同步扣除 rounds 內的已結帳品項（從第一次訂單開始扣）
+                        if (Array.isArray(orig.rounds)) {
+                            const toDeduct = {};
+                            splitItems.forEach(s => {
+                                toDeduct[s.id] = (toDeduct[s.id] || 0) + (Number(s.qty) || 0);
+                            });
+
+                            orig.rounds = orig.rounds
+                                .map(r => ({
+                                    ...r,
+                                    items: (r.items || [])
+                                        .map(it => {
+                                            const d = toDeduct[it.id] || 0;
+                                            if (d <= 0) return it;
+                                            const used = Math.min(Number(it.qty) || 0, d);
+                                            toDeduct[it.id] -= used;
+                                            const left = (Number(it.qty) || 0) - used;
+                                            return left > 0 ? { ...it, qty: left } : null;
+                                        })
+                                        .filter(Boolean),
+                                }))
+                                .filter(r => r.items.length > 0);
+                        }
+
                         unpaid[idx] = orig;
                     }
                 } else {
