@@ -24,6 +24,54 @@
   height: 92vh;
 }
 
+/* ─── 月結單未結算提醒橫幅 ──────────────────────────────────────────── */
+.monthly-reminder-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 720px;
+  margin: 1rem auto 0;
+  padding: 0.85rem 1.2rem;
+  background: #fff8e6;
+  border: 1px solid #f5c26b;
+  border-left: 6px solid #e67e22;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.15);
+  color: #7c4a03;
+  font-size: 1rem;
+}
+
+.mrb-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.mrb-go-btn {
+  background: #e67e22;
+  color: #ffffff;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mrb-go-btn:hover {
+  background: #d35400;
+}
+
+.mrb-close-btn {
+  background: transparent;
+  border: none;
+  color: #9a6715;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.4rem;
+}
+
 .container1 {
   display: flex;
   align-items: flex-start;

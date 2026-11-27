@@ -89,6 +89,26 @@ export default function Table() {
     const [showSplit, setShowSplit] = useState(false);
     const [splitQtys, setSplitQtys] = useState({});
 
+    const todayStr = getTaiwanDateYYYYMMDD();
+    const currentMonth = todayStr.slice(0, 7); // 例如 "2026-11"
+
+    const [unsettledMonth, setUnsettledMonth] = useState(() => {
+        const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+        const oldEntry = monthly.find(
+            r => r.timestamp && r.timestamp.slice(0, 7) < currentMonth
+        );
+        return oldEntry ? oldEntry.timestamp.slice(0, 7) : null;
+    });
+
+    const [monthlyReminderClosed, setMonthlyReminderClosed] = useState(() => {
+        return sessionStorage.getItem(`monthlyReminderClosed_${todayStr}`) === 'true';
+    });
+
+    const handleCloseMonthlyReminder = () => {
+        sessionStorage.setItem(`monthlyReminderClosed_${todayStr}`, 'true');
+        setMonthlyReminderClosed(true);
+    };
+
     // ─── 換桌相關 State ────────────────────────────────────────────
     const [showMove, setShowMove] = useState(false);
     const [targetTable, setTargetTable] = useState('');
@@ -171,7 +191,20 @@ export default function Table() {
         };
         load();
 
-        const onStorage = (e) => { if (e.key === 'reservations') load(); };
+        const checkUnsettledMonth = () => {
+            const curMonth = getTaiwanDateYYYYMMDD().slice(0, 7);
+            const monthly = JSON.parse(localStorage.getItem('monthlyReport') || '[]');
+            const oldEntry = monthly.find(
+                r => r.timestamp && r.timestamp.slice(0, 7) < curMonth
+            );
+            setUnsettledMonth(oldEntry ? oldEntry.timestamp.slice(0, 7) : null);
+        };
+        checkUnsettledMonth();
+
+        const onStorage = (e) => {
+            if (e.key === 'reservations') load();
+            if (e.key === 'monthlyReport' || e.key === null) checkUnsettledMonth();
+        };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
     }, []);
@@ -547,6 +580,30 @@ export default function Table() {
             )}
 
             <main className="main">
+                {unsettledMonth && !monthlyReminderClosed && (
+                    <div className="monthly-reminder-banner">
+                        <div className="mrb-text">
+                            <strong>月結單未結算提醒：</strong>尚有 <b>{unsettledMonth}</b> 的月報資料未匯出，請前往「月報」下載 CSV 完成結算！
+                        </div>
+                        <div className="mrb-actions">
+                            <button
+                                type="button"
+                                className="mrb-go-btn"
+                                onClick={goReports}
+                            >
+                                前往月報
+                            </button>
+                            <button
+                                type="button"
+                                className="mrb-close-btn"
+                                onClick={handleCloseMonthlyReminder}
+                                title="本次暫時關閉提醒"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <div className="a-top-group">
                     <button
                         className="shape square light"
